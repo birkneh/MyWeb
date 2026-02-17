@@ -399,6 +399,20 @@ function initPhoto(){
   }
 }
 
+function openPublicationsIfHash(){
+  const hash = (location.hash || "").replace("#", "").toLowerCase();
+  if(hash === "publications" || hash === "pubs"){
+    // Activate the Publications tab
+    const pubsTab = document.querySelector('.tab[data-tab="pubs"]');
+    if(pubsTab) pubsTab.click();
+
+    // Scroll to the publications card
+    requestAnimationFrame(() => {
+      document.getElementById("publications")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+}
+
 /* =========================================================
    BOOT
    ========================================================= */
@@ -419,5 +433,8 @@ window.addEventListener("DOMContentLoaded", async ()=>{
     PUBS = await loadPublications({ preferPubMed: true });
     document.getElementById("last-updated").textContent = new Date().toLocaleString();
     renderPublications();
+   PUBS = await loadPublications({ preferPubMed: AUTO_FETCH_PUBMED_ON_LOAD });
+   renderPublications();
+   openPublicationsIfHash();
   });
 });
