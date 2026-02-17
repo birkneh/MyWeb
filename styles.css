@@ -236,7 +236,20 @@ body.dark .chip{ background: rgba(255,255,255,0.06); }
   color: var(--text);
   border: 1px solid var(--border);
 }
+/* ===== Sticky/frozen tabs under the fixed topbar ===== */
+.tabs{
+  position: sticky;
+  top: 72px;            /* set to your topbar height */
+  z-index: 900;
+  background: var(--bg, #fff);
+  padding-top: 10px;    /* keeps the pill from touching the edge */
+  padding-bottom: 10px;
+}
 
+/* If your topbar is fixed, ensure content isn't hidden under it */
+.page{
+  padding-top: 72px;    /* same as topbar height */
+}
 /* Content panels */
 .content{ display:none; margin-top: 16px; }
 .content.active{ display:block; }
