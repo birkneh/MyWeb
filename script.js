@@ -413,6 +413,42 @@ function openPublicationsIfHash(){
   }
 }
 
+// --- Fix top navigation so it always opens the correct panel ---
+function bindTopNavFix(){
+  const navLinks = document.querySelectorAll(".navlink");
+  const clickTab = (name) => document.querySelector(`.tab[data-tab="${name}"]`)?.click();
+
+  navLinks.forEach(a => {
+    a.addEventListener("click", (e) => {
+      const href = a.getAttribute("href") || "";
+      if(!href.startsWith("#")) return;
+
+      const id = href.slice(1);
+
+      if (id === "publications" || id === "pubs") {
+        e.preventDefault();
+        clickTab("pubs");
+        history.replaceState(null, "", "#publications");
+        requestAnimationFrame(() => {
+          document.getElementById("publications")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+        return;
+      }
+
+      if (["summary", "experience", "education", "grants", "top"].includes(id)) {
+        e.preventDefault();
+        clickTab("cv");
+        history.replaceState(null, "", `#${id}`);
+        requestAnimationFrame(() => {
+          const el = document.getElementById(id);
+          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+          else window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      }
+    });
+  });
+}
+
 /* =========================================================
    BOOT
    ========================================================= */
@@ -423,18 +459,24 @@ window.addEventListener("DOMContentLoaded", async ()=>{
   initTheme();
   initPhoto();
 
+  // Fix top navigation + direct hash loads
+  bindTopNavFix();
+
+  // initial load
   PUBS = await loadPublications({ preferPubMed: AUTO_FETCH_PUBMED_ON_LOAD });
   renderPublications();
+
+  // open pubs panel if URL has #publications
+  openPublicationsIfHash();
 
   document.getElementById("pub-search")?.addEventListener("input", renderPublications);
   document.getElementById("pub-sort")?.addEventListener("change", renderPublications);
 
+  // refresh button: fetch from PubMed again
   document.getElementById("btn-refresh")?.addEventListener("click", async ()=>{
+    setStatus("Refreshing from PubMed…");
     PUBS = await loadPublications({ preferPubMed: true });
     document.getElementById("last-updated").textContent = new Date().toLocaleString();
     renderPublications();
-   PUBS = await loadPublications({ preferPubMed: AUTO_FETCH_PUBMED_ON_LOAD });
-   renderPublications();
-   openPublicationsIfHash();
   });
 });
