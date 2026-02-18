@@ -552,3 +552,179 @@ a:hover{ text-decoration: none; }
   font-weight: 800;
   border-top: 1px solid var(--border);
 }
+/* =========================================================
+   VISUAL UPGRADE PACK (paste at END of styles.css)
+   Keeps your layout, makes it feel like a real site.
+========================================================= */
+
+/* Background texture + depth */
+body{
+  background:
+    radial-gradient(1000px 650px at 12% -12%, rgba(124,92,255,0.45), transparent 56%),
+    radial-gradient(900px 650px at 88% 6%, rgba(34,197,94,0.26), transparent 55%),
+    radial-gradient(800px 520px at 55% 115%, rgba(245,158,11,0.16), transparent 60%),
+    linear-gradient(180deg, var(--bg), var(--bg2));
+}
+
+/* Add a subtle noise overlay (no images needed) */
+body::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 3px),
+    repeating-linear-gradient(90deg, rgba(0,0,0,0.08) 0, rgba(0,0,0,0.08) 1px, transparent 1px, transparent 4px);
+  mix-blend-mode: overlay;
+}
+
+/* Typography polish */
+.title h1{
+  font-size: clamp(28px, 3.1vw, 40px);
+  letter-spacing: -0.7px;
+}
+.subtitle{
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Topbar: richer + clearer separation */
+.topbar{
+  background: rgba(8,12,22,0.55);
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+.topbar::after{
+  content:"";
+  position:absolute;
+  left:0; right:0; bottom:-1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(124,92,255,0.5), rgba(34,197,94,0.4), transparent);
+  opacity: 0.65;
+}
+
+/* Brand feels clickable */
+.brand{
+  padding: 8px 10px;
+  border-radius: 999px;
+  transition: transform 160ms ease, background 160ms ease;
+}
+.brand:hover{
+  transform: translateY(-1px);
+  background: rgba(255,255,255,0.06);
+}
+
+/* Nav links: stronger active feel using :target highlight */
+section:target .card-h h2{
+  text-shadow: 0 0 18px rgba(124,92,255,0.25);
+}
+.navlink{
+  position: relative;
+}
+.navlink::after{
+  content:"";
+  position:absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 6px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(124,92,255,0.0), rgba(124,92,255,0.75), rgba(34,197,94,0.65), rgba(124,92,255,0.0));
+  opacity: 0;
+  transform: translateY(3px);
+  transition: all 160ms ease;
+}
+.navlink:hover::after{
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hero: more “real website” depth and highlight */
+.hero-card{
+  border-color: rgba(255,255,255,0.14);
+  box-shadow: 0 18px 46px rgba(0,0,0,0.40);
+}
+.hero-card::after{
+  content:"";
+  position:absolute;
+  inset: 0;
+  pointer-events:none;
+  background: radial-gradient(500px 140px at 30% 0%, rgba(255,255,255,0.10), transparent 60%);
+  opacity: 0.7;
+}
+
+/* Chips: more contrast + micro-interaction */
+.chip{
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.12);
+}
+.chip:hover{
+  border-color: rgba(255,255,255,0.20);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.22);
+}
+
+/* Cards: stronger hierarchy + subtle inner glow */
+.card{
+  background:
+    radial-gradient(700px 220px at 20% 0%, rgba(124,92,255,0.10), transparent 60%),
+    radial-gradient(700px 220px at 85% 10%, rgba(34,197,94,0.08), transparent 55%),
+    rgba(255,255,255,0.055);
+  border-color: rgba(255,255,255,0.12);
+  box-shadow: 0 14px 32px rgba(0,0,0,0.28);
+}
+.card:hover{
+  border-color: rgba(255,255,255,0.20);
+  box-shadow: 0 18px 44px rgba(0,0,0,0.36);
+}
+
+/* Section headings: better separation */
+.card-h{
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.card-h h2{
+  font-size: 18px;
+}
+.pill{
+  border-color: rgba(124,92,255,0.34);
+  background: rgba(124,92,255,0.12);
+}
+
+/* Timeline/Edu/Mini: slightly stronger and cleaner */
+.t-item, .edu-row, .mini, .lang, .pub{
+  background: rgba(255,255,255,0.035);
+  border-color: rgba(255,255,255,0.10);
+}
+.t-item:hover, .edu-row:hover, .mini:hover, .lang:hover{
+  border-color: rgba(255,255,255,0.16);
+}
+
+/* Publications: add a “moderation” control row if present */
+.pub-links{
+  align-items: center;
+}
+
+/* Make status pill look like a badge */
+.status{
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.04);
+}
+
+/* Inputs: modern glass */
+.field input, .field select{
+  background: rgba(255,255,255,0.05);
+}
+
+/* Blog section a bit nicer even as placeholder */
+#blogs .muted{
+  line-height: 1.6;
+}
+
+/* Wide sections: center nicely */
+.card-wide{
+  width: min(var(--max), calc(100% - 28px));
+  margin-left: auto;
+  margin-right: auto;
+}
