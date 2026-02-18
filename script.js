@@ -22,6 +22,111 @@ const LOCAL_PUBLICATIONS_JSON = "./publications.json";
 const AUTO_FETCH_PUBMED_ON_LOAD = true;
 
 /* =========================================================
+   FEATURED LINKEDIN (INTERACTIVE CARD)
+   Requires HTML IDs:
+   li-open, li-share, li-copy, li-title, li-date, li-excerpt,
+   li-thumb-link, li-thumb, li-toggle, li-expand, li-embedwrap, li-iframe
+   ========================================================= */
+
+const FEATURED_LINKEDIN = {
+  // Your post (normalized URL; query params removed)
+  url: "https://www.linkedin.com/feed/update/urn:li:activity:7429265326846013440/",
+  title: "Featured LinkedIn post",
+  date: "Recent",
+  excerpt:
+    "Open the post to view reactions, comments, and the full discussion on LinkedIn."
+};
+
+// Best-effort: LinkedIn embed endpoint works only for some posts/accounts.
+function linkedInEmbedFromActivityUrn(url){
+  const m = String(url).match(/urn:li:activity:(\d+)/i);
+  if(!m) return null;
+  const id = m[1];
+  return `https://www.linkedin.com/embed/feed/update/urn:li:activity:${id}`;
+}
+
+// Best-effort thumbnail fetch via OpenGraph (many sites block; we degrade gracefully).
+// If it fails, we keep the fallback UI.
+async function tryLoadLinkPreviewImage(url){
+  const imgEl = document.getElementById("li-thumb");
+  if(!imgEl) return;
+
+  // We cannot fetch LinkedIn OG data client-side due to CORS.
+  // So: do nothing here unless you later add your own preview image in repo.
+  // If you want a local thumbnail, set:
+  // imgEl.src = "./assets/featured-linkedin.jpg";
+}
+
+function initLinkedInFeatured(){
+  const openA = document.getElementById("li-open");
+  const shareA = document.getElementById("li-share");
+  const copyBtn = document.getElementById("li-copy");
+  const titleEl = document.getElementById("li-title");
+  const dateEl = document.getElementById("li-date");
+  const excerptEl = document.getElementById("li-excerpt");
+  const thumbLink = document.getElementById("li-thumb-link");
+
+  const toggle = document.getElementById("li-toggle");
+  const expand = document.getElementById("li-expand");
+
+  if(openA) openA.href = FEATURED_LINKEDIN.url;
+  if(thumbLink) thumbLink.href = FEATURED_LINKEDIN.url;
+
+  if(shareA){
+    shareA.href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(FEATURED_LINKEDIN.url)}`;
+  }
+
+  if(titleEl) titleEl.textContent = FEATURED_LINKEDIN.title;
+  if(dateEl) dateEl.textContent = FEATURED_LINKEDIN.date;
+  if(excerptEl) excerptEl.textContent = FEATURED_LINKEDIN.excerpt;
+
+  // Expand/collapse
+  if(toggle && expand){
+    toggle.addEventListener("click", ()=>{
+      const isOpen = toggle.getAttribute("aria-expanded") === "true";
+      toggle.setAttribute("aria-expanded", String(!isOpen));
+      expand.hidden = isOpen;
+    });
+  }
+
+  // Copy link (with inline feedback)
+  if(copyBtn){
+    copyBtn.addEventListener("click", async ()=>{
+      try{
+        await navigator.clipboard.writeText(FEATURED_LINKEDIN.url);
+        const old = copyBtn.innerHTML;
+        copyBtn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
+        setTimeout(()=> copyBtn.innerHTML = old, 900);
+      }catch(e){
+        console.warn("Copy failed", e);
+      }
+    });
+  }
+
+  // Best-effort embed attempt (often blocked)
+  const iframe = document.getElementById("li-iframe");
+  const wrap = document.getElementById("li-embedwrap");
+  const emb = linkedInEmbedFromActivityUrn(FEATURED_LINKEDIN.url);
+
+  if(iframe && wrap && emb){
+    iframe.src = emb;
+
+    // Reveal embed container only after user expands, to avoid blank block on load.
+    // If the user expands, show it.
+    if(expand){
+      const showEmbedWhenOpen = ()=>{
+        const isOpen = toggle?.getAttribute("aria-expanded") === "true";
+        if(isOpen) wrap.hidden = false;
+      };
+      toggle?.addEventListener("click", showEmbedWhenOpen);
+    }
+  }
+
+  // Optional: if you later add a local thumbnail image, it will show nicely.
+  tryLoadLinkPreviewImage(FEATURED_LINKEDIN.url);
+}
+
+/* =========================================================
    PUBLICATION REVIEW (ACCEPT/REJECT)
    ========================================================= */
 
@@ -504,6 +609,9 @@ window.addEventListener("DOMContentLoaded", async ()=>{
 
   initTheme();
   initPhoto();
+
+  // Featured LinkedIn interactive card
+  initLinkedInFeatured();
 
   loadPubReview();
 
