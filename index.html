@@ -5,14 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Birkneh T. Tadesse MD PhD | CV</title>
 
-  <!-- Icons -->
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
   <link rel="stylesheet" href="./styles.css" />
 
   <style>
-    section[id]{ scroll-margin-top: 110px; } /* fixes anchor jump under fixed header */
+    section[id]{ scroll-margin-top: 96px; }
   </style>
 </head>
 
@@ -20,9 +19,9 @@
   <!-- Fixed top bar -->
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="#about" aria-label="Go to About">
-        <span class="brand-dot"></span>
-        <span class="brand-text">About</span>
+      <a class="brand" href="#top" aria-label="Go to top">
+        <span class="brand-mark"></span>
+        <span class="brand-text">Birkneh T. Tadesse</span>
       </a>
 
       <nav class="nav" aria-label="Primary">
@@ -49,17 +48,17 @@
   </header>
 
   <main id="top" class="page">
-
     <!-- HERO -->
     <section class="hero">
-      <div class="hero-card">
+      <div class="hero-inner">
         <div class="hero-left">
-          <div class="title">
-            <h1>Birkneh T. Tadesse <span class="muted">MD PhD</span></h1>
-            <p class="subtitle">Epidemiology • Clinical Development • Vaccine Impact • Global Health Leadership</p>
-          </div>
+          <div class="kicker">Physician–Epidemiologist • Vaccine Impact • Clinical Development</div>
+          <h1 class="hero-title">Birkneh T. Tadesse <span class="hero-sub">MD PhD</span></h1>
+          <p class="hero-lede">
+            Global health leader advancing vaccine development, evaluation, and implementation across Africa, Asia, and Europe.
+          </p>
 
-          <div class="chips">
+          <div class="hero-actions">
             <a class="chip" target="_blank" rel="noreferrer" href="https://linkedin.com/in/birkneh-t-tadesse-7b542ba3">
               <i class="fa-brands fa-linkedin"></i> LinkedIn
             </a>
@@ -75,9 +74,20 @@
             <a class="chip" href="tel:+821098041348">
               <i class="fa-solid fa-mobile-screen"></i> +82 10-9804-1348
             </a>
-            <a class="chip chip-cv" href="./Tadesse_CV_4FEB26.pdf" target="_blank" rel="noreferrer">
+            <a class="chip chip-strong" href="./Tadesse_CV_4FEB26.pdf" target="_blank" rel="noreferrer">
               <i class="fa-solid fa-file-lines"></i> CV (PDF)
             </a>
+          </div>
+
+          <div class="hero-meta">
+            <div class="meta">
+              <div class="meta-label">Last updated</div>
+              <div class="meta-value" id="last-updated">—</div>
+            </div>
+            <div class="meta">
+              <div class="meta-label">Location</div>
+              <div class="meta-value">Seoul, Republic of Korea</div>
+            </div>
           </div>
         </div>
 
@@ -90,106 +100,92 @@
             </div>
           </div>
         </div>
+      </div>
+    </section>
 
-        <div class="hero-meta">
-          <div class="meta-row">
-            <span class="meta-label">Last updated</span>
-            <span class="meta-value" id="last-updated">—</span>
+    <!-- FEATURED -->
+    <section class="featured">
+      <div class="featured-grid">
+        <div class="card">
+          <div class="card-h">
+            <h2>Featured</h2>
+            <span class="pill">Latest highlight</span>
           </div>
-          <div class="meta-row">
-            <span class="meta-label">Location</span>
-            <span class="meta-value">Seoul, Republic of Korea</span>
+
+          <div class="post-card" id="li-card" data-url="https://www.linkedin.com/feed/update/urn:li:activity:7429265326846013440/">
+            <div class="post-top">
+              <div class="post-icon"><i class="fa-brands fa-linkedin"></i></div>
+              <div class="post-title">
+                <div class="post-kicker">LinkedIn</div>
+                <div class="post-headline">Recent post</div>
+                <div class="post-sub">Interactive preview • open / copy link</div>
+              </div>
+              <div class="post-actions">
+                <button class="btn btn-ghost btn-sm" type="button" id="btn-li-toggle">
+                  <i class="fa-solid fa-chevron-down"></i> Expand
+                </button>
+                <a class="btn btn-primary btn-sm" href="https://www.linkedin.com/feed/update/urn:li:activity:7429265326846013440/" target="_blank" rel="noreferrer">
+                  <i class="fa-solid fa-up-right-from-square"></i> Open
+                </a>
+              </div>
+            </div>
+
+            <div class="post-body" id="li-body" hidden>
+              <div class="muted">
+                LinkedIn content can’t be reliably embedded on external sites. Use “Open” to view the live post.
+              </div>
+
+              <!-- Optional: paste a short excerpt of your post here (kept editable) -->
+              <div class="post-excerpt" id="li-excerpt">
+                <b>Excerpt:</b> (optional) Paste 2–4 lines from your post here for a richer preview.
+              </div>
+
+              <div class="post-actions-row">
+                <button class="btn btn-secondary btn-sm" type="button" id="btn-li-copy">
+                  <i class="fa-solid fa-copy"></i> Copy link
+                </button>
+                <span class="status" id="li-status"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-h">
+            <h2>Quick profile</h2>
+            <span class="pill">At a glance</span>
+          </div>
+
+          <div class="facts">
+            <div class="fact">
+              <div class="fact-k">Focus</div>
+              <div class="fact-v">Vaccine impact & effectiveness, clinical development, policy translation</div>
+            </div>
+            <div class="fact">
+              <div class="fact-k">Leadership</div>
+              <div class="fact-v">Multidisciplinary teams • multi-country partnerships • stakeholder engagement</div>
+            </div>
+            <div class="fact">
+              <div class="fact-k">Methods</div>
+              <div class="fact-v">Epidemiology • biostatistics • real-world evidence • causal inference</div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- FEATURED LINKEDIN -->
-<section id="featured" class="card card-wide">
-  <div class="card-h">
-    <h2>Featured</h2>
-    <span class="pill">LinkedIn</span>
-  </div>
-
-  <div class="li-card" id="li-card">
-    <div class="li-head">
-      <div class="li-badge">
-        <i class="fa-brands fa-linkedin"></i>
-        <span>Recent post</span>
-      </div>
-
-      <button class="li-toggle" id="li-toggle" type="button" aria-expanded="false">
-        <span>Show preview</span>
-        <i class="fa-solid fa-chevron-down"></i>
-      </button>
-    </div>
-
-    <div class="li-main">
-      <div class="li-text">
-        <h3 class="li-title" id="li-title">Featured LinkedIn post</h3>
-        <div class="li-meta">
-          <span id="li-date">—</span>
-          <span class="dot">•</span>
-          <span id="li-domain">linkedin.com</span>
-        </div>
-
-        <p class="li-excerpt" id="li-excerpt">
-          Open the post on LinkedIn for the full interactive experience (comments, reactions, shares).
-        </p>
-
-        <div class="li-actions">
-          <a id="li-open" class="btn btn-primary" target="_blank" rel="noreferrer">
-            <i class="fa-brands fa-linkedin"></i> Open on LinkedIn
-          </a>
-
-          <button id="li-copy" class="btn btn-ghost" type="button">
-            <i class="fa-regular fa-copy"></i> Copy link
-          </button>
-
-          <a id="li-share" class="btn btn-secondary" target="_blank" rel="noreferrer">
-            <i class="fa-solid fa-share-nodes"></i> Share
-          </a>
-        </div>
-      </div>
-
-      <div class="li-media">
-        <a id="li-thumb-link" target="_blank" rel="noreferrer" class="li-thumb">
-          <img id="li-thumb" alt="LinkedIn post preview" />
-          <div class="li-thumb-fallback">
-            <i class="fa-brands fa-linkedin"></i>
-            <div>
-              <div class="li-fb-title">Interactive preview</div>
-              <div class="li-fb-sub muted">Click to view on LinkedIn</div>
-            </div>
-          </div>
-        </a>
-      </div>
-    </div>
-
-    <div class="li-expand" id="li-expand" hidden>
-      <div class="li-preview-note muted">
-        Preview cards depend on what LinkedIn allows browsers to fetch. If the preview doesn’t load, the buttons still work.
-      </div>
-
-      <!-- Optional “embed attempt” (usually blocked). We only show if it loads. -->
-      <div class="li-embedwrap" id="li-embedwrap" hidden>
-        <iframe id="li-iframe" title="LinkedIn embed" loading="lazy"></iframe>
-      </div>
-    </div>
-  </div>
-</section>
-
     <!-- CV GRID -->
     <section class="content">
       <div class="grid-2">
 
-        <!-- LEFT COLUMN -->
+        <!-- LEFT -->
         <div class="col">
           <section id="about" class="card">
             <div class="card-h">
               <h2>About</h2>
               <span class="pill">Profile</span>
             </div>
+
             <div class="prose">
               <p>
                 Physician–epidemiologist and global health leader with two decades of experience advancing vaccine development,
@@ -200,7 +196,7 @@
                 strengthen research capacity in resource-limited settings.
               </p>
 
-              <h3 style="margin-top:14px;">TL,DR</h3>
+              <h3>35-word Headline</h3>
               <p>
                 Global vaccine epidemiologist and clinical development leader driving evidence from trials to policy—advancing
                 vaccine impact, effectiveness, and access through rigorous analytics, multi-country collaboration, and strategic
@@ -226,7 +222,7 @@
           <section id="experience" class="card">
             <div class="card-h">
               <h2>Work Experience</h2>
-              <span class="pill">Shortlist</span>
+              <span class="pill">Selected</span>
             </div>
 
             <div class="timeline">
@@ -343,7 +339,7 @@
           </section>
         </div>
 
-        <!-- RIGHT COLUMN -->
+        <!-- RIGHT -->
         <div class="col">
           <section class="card">
             <div class="card-h">
@@ -370,7 +366,7 @@
           <section id="grants" class="card">
             <div class="card-h">
               <h2>Research Grants Support</h2>
-              <span class="pill">Main Grants</span>
+              <span class="pill">Main grants</span>
             </div>
 
             <div class="cards">
@@ -456,11 +452,11 @@
       </div>
     </section>
 
-    <!-- PUBLICATIONS (same page, below CV) -->
+    <!-- PUBLICATIONS -->
     <section id="publications" class="card card-wide">
       <div class="card-h">
         <h2>Peer Reviewed Publications</h2>
-        <span class="pill">PubMed auto-fetch + curation</span>
+        <span class="pill">PubMed auto-fetch + review</span>
       </div>
 
       <div class="pub-controls">
@@ -508,16 +504,35 @@
         <h2>Blogs</h2>
         <span class="pill">Coming soon</span>
       </div>
-      <div class="muted">Blog posts will appear here.</div>
+
+      <div class="blog-grid">
+        <div class="blog-card">
+          <div class="blog-title">Featured: LinkedIn post</div>
+          <div class="blog-meta muted">Interactive preview above • open on LinkedIn</div>
+          <div class="blog-actions">
+            <a class="btn btn-primary btn-sm" href="https://www.linkedin.com/feed/update/urn:li:activity:7429265326846013440/" target="_blank" rel="noreferrer">
+              <i class="fa-brands fa-linkedin"></i> View
+            </a>
+            <button class="btn btn-ghost btn-sm" type="button" id="btn-scroll-featured">
+              <i class="fa-solid fa-arrow-up"></i> Jump to Featured
+            </button>
+          </div>
+        </div>
+
+        <div class="blog-card">
+          <div class="blog-title">Blog post #1</div>
+          <div class="blog-meta muted">Add your first post here</div>
+          <div class="muted">Create a <code>blogs.json</code> later if you want these to auto-load.</div>
+        </div>
+      </div>
     </section>
 
     <footer class="footer">
       <div class="footer-inner">
         <span>© <span id="year-now"></span> Birkneh T. Tadesse</span>
-        <span class="muted"></span>
+        <span class="muted"> </span>
       </div>
     </footer>
-
   </main>
 
   <script src="./script.js"></script>
