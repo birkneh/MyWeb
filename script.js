@@ -2,136 +2,25 @@
    CONFIG (DISAMBIGUATED)
    ========================================================= */
 
-// Use the exact PubMed term style you shared (works on PubMed)
 const PUBMED_AUTHOR_QUERY =
   `(birkneh tilahun tadesse[Author] OR birkneh tilahun[Author] or tadesse bt[Author])`;
 
-// Optional “bad-fit” keywords to exclude (title/abstract)
 const EXCLUDE_TITLE_ABSTRACT = [
   `"food safety"[Title/Abstract]`,
   `"foodborne"[Title/Abstract]`
 ];
 
-// Max pubs to pull from PubMed per refresh
 const PUBMED_MAX = 250;
-
-// Local fallback file in your repo
 const LOCAL_PUBLICATIONS_JSON = "./publications.json";
-
-// Toggle: auto fetch PubMed on load
 const AUTO_FETCH_PUBMED_ON_LOAD = true;
-
-/* =========================================================
-   FEATURED LINKEDIN (INTERACTIVE CARD)
-   Requires HTML IDs:
-   li-open, li-share, li-copy, li-title, li-date, li-excerpt,
-   li-thumb-link, li-thumb, li-toggle, li-expand, li-embedwrap, li-iframe
-   ========================================================= */
-
-const FEATURED_LINKEDIN = {
-  // Your post (normalized URL; query params removed)
-  url: "https://www.linkedin.com/feed/update/urn:li:activity:7429265326846013440/",
-  title: "Featured LinkedIn post",
-  date: "Recent",
-  excerpt:
-    "Open the post to view reactions, comments, and the full discussion on LinkedIn."
-};
-
-// Best-effort: LinkedIn embed endpoint works only for some posts/accounts.
-function linkedInEmbedFromActivityUrn(url){
-  const m = String(url).match(/urn:li:activity:(\d+)/i);
-  if(!m) return null;
-  const id = m[1];
-  return `https://www.linkedin.com/embed/feed/update/urn:li:activity:${id}`;
-}
-
-// Best-effort thumbnail fetch via OpenGraph (many sites block; we degrade gracefully).
-// If it fails, we keep the fallback UI.
-async function tryLoadLinkPreviewImage(url){
-  const imgEl = document.getElementById("li-thumb");
-  if(!imgEl) return;
-
-  // We cannot fetch LinkedIn OG data client-side due to CORS.
-  // So: do nothing here unless you later add your own preview image in repo.
-  // If you want a local thumbnail, set:
-  // imgEl.src = "./assets/featured-linkedin.jpg";
-}
-
-function initLinkedInFeatured(){
-  const openA = document.getElementById("li-open");
-  const shareA = document.getElementById("li-share");
-  const copyBtn = document.getElementById("li-copy");
-  const titleEl = document.getElementById("li-title");
-  const dateEl = document.getElementById("li-date");
-  const excerptEl = document.getElementById("li-excerpt");
-  const thumbLink = document.getElementById("li-thumb-link");
-
-  const toggle = document.getElementById("li-toggle");
-  const expand = document.getElementById("li-expand");
-
-  if(openA) openA.href = FEATURED_LINKEDIN.url;
-  if(thumbLink) thumbLink.href = FEATURED_LINKEDIN.url;
-
-  if(shareA){
-    shareA.href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(FEATURED_LINKEDIN.url)}`;
-  }
-
-  if(titleEl) titleEl.textContent = FEATURED_LINKEDIN.title;
-  if(dateEl) dateEl.textContent = FEATURED_LINKEDIN.date;
-  if(excerptEl) excerptEl.textContent = FEATURED_LINKEDIN.excerpt;
-
-  // Expand/collapse
-  if(toggle && expand){
-    toggle.addEventListener("click", ()=>{
-      const isOpen = toggle.getAttribute("aria-expanded") === "true";
-      toggle.setAttribute("aria-expanded", String(!isOpen));
-      expand.hidden = isOpen;
-    });
-  }
-
-  // Copy link (with inline feedback)
-  if(copyBtn){
-    copyBtn.addEventListener("click", async ()=>{
-      try{
-        await navigator.clipboard.writeText(FEATURED_LINKEDIN.url);
-        const old = copyBtn.innerHTML;
-        copyBtn.innerHTML = `<i class="fa-solid fa-check"></i> Copied`;
-        setTimeout(()=> copyBtn.innerHTML = old, 900);
-      }catch(e){
-        console.warn("Copy failed", e);
-      }
-    });
-  }
-
-  // Best-effort embed attempt (often blocked)
-  const iframe = document.getElementById("li-iframe");
-  const wrap = document.getElementById("li-embedwrap");
-  const emb = linkedInEmbedFromActivityUrn(FEATURED_LINKEDIN.url);
-
-  if(iframe && wrap && emb){
-    iframe.src = emb;
-
-    // Reveal embed container only after user expands, to avoid blank block on load.
-    // If the user expands, show it.
-    if(expand){
-      const showEmbedWhenOpen = ()=>{
-        const isOpen = toggle?.getAttribute("aria-expanded") === "true";
-        if(isOpen) wrap.hidden = false;
-      };
-      toggle?.addEventListener("click", showEmbedWhenOpen);
-    }
-  }
-
-  // Optional: if you later add a local thumbnail image, it will show nicely.
-  tryLoadLinkPreviewImage(FEATURED_LINKEDIN.url);
-}
 
 /* =========================================================
    PUBLICATION REVIEW (ACCEPT/REJECT)
    ========================================================= */
 
-const PUB_REVIEW_STORAGE_KEY = "pub_review_v1"; // persists on GitHub Pages
+const PUB_REVIEW_STORAGE_KEY = "pub_review_v1";
 let PUB_REVIEW = {}; // { key: "accepted" | "rejected" }
+
 function loadPubReview(){
   try{ PUB_REVIEW = JSON.parse(localStorage.getItem(PUB_REVIEW_STORAGE_KEY) || "{}") || {}; }
   catch(e){ PUB_REVIEW = {}; }
@@ -147,7 +36,7 @@ function pubKey(p){
 function getReviewState(p){
   return PUB_REVIEW[pubKey(p)] || "unreviewed";
 }
-function setReviewState(p, state){ // accepted | rejected | unreviewed
+function setReviewState(p, state){
   const k = pubKey(p);
   if(state === "unreviewed") delete PUB_REVIEW[k];
   else PUB_REVIEW[k] = state;
@@ -236,13 +125,11 @@ function renderPublications(){
   const filtered = filterPublications(PUBS, search);
   const sortedAll = sortPublications(filtered, sortMode);
 
-  // Review filtering
   const sorted = sortedAll.filter(p=>{
     const st = getReviewState(p);
     if(reviewMode === "accepted") return st === "accepted";
     if(reviewMode === "rejected") return st === "rejected";
     if(reviewMode === "unreviewed") return st === "unreviewed";
-    // default "all": hide rejected
     return st !== "rejected";
   });
 
@@ -254,7 +141,6 @@ function renderPublications(){
     return;
   }
 
-  // counts for status
   let nAccepted = 0, nRejected = 0, nUnreviewed = 0;
   for(const p of sortedAll){
     const st = getReviewState(p);
@@ -355,7 +241,7 @@ function renderPublications(){
     aCR.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> Crossref`;
     links.appendChild(aCR);
 
-    // Review actions
+    // Review buttons
     const reviewBar = document.createElement("div");
     reviewBar.className = "pub-links";
 
@@ -411,7 +297,7 @@ function renderPublications(){
 }
 
 /* =========================================================
-   LOADING: LOCAL FALLBACK
+   LOADING
    ========================================================= */
 
 async function loadLocalPublications(){
@@ -426,10 +312,6 @@ async function loadLocalPublications(){
     return [];
   }
 }
-
-/* =========================================================
-   LOADING: PUBMED (ONLINE)
-   ========================================================= */
 
 function buildPubMedQuery(){
   const exclPart = EXCLUDE_TITLE_ABSTRACT.length
@@ -493,10 +375,6 @@ async function fetchPubMed(){
 
   return pubs;
 }
-
-/* =========================================================
-   MERGE & DEDUPE
-   ========================================================= */
 
 function dedupePubs(pubs){
   const seen = new Set();
@@ -562,7 +440,7 @@ async function loadPublications({preferPubMed=true}={}){
 }
 
 /* =========================================================
-   THEME + PHOTO PLACEHOLDER
+   THEME + PHOTO
    ========================================================= */
 
 function initTheme(){
@@ -583,19 +461,63 @@ function initPhoto(){
   const fallback = document.querySelector(".photo-fallback");
   if(!img || !fallback) return;
 
-  // Use image2.jpg if present (already in HTML). If it fails, fallback shows.
   img.addEventListener("error", ()=>{
     img.style.display = "none";
     fallback.style.display = "flex";
   });
 
-  // If src looks valid, show it
   if(img.src && img.src.trim()){
     img.style.display = "block";
     fallback.style.display = "none";
   } else {
     img.style.display = "none";
     fallback.style.display = "flex";
+  }
+}
+
+/* =========================================================
+   FEATURED LINKEDIN INTERACTION
+   ========================================================= */
+
+function initFeaturedLinkedIn(){
+  const toggle = document.getElementById("btn-li-toggle");
+  const body = document.getElementById("li-body");
+  const copyBtn = document.getElementById("btn-li-copy");
+  const status = document.getElementById("li-status");
+  const card = document.getElementById("li-card");
+  const jumpBtn = document.getElementById("btn-scroll-featured");
+
+  if(toggle && body){
+    toggle.addEventListener("click", ()=>{
+      const isHidden = body.hasAttribute("hidden");
+      if(isHidden){
+        body.removeAttribute("hidden");
+        toggle.innerHTML = `<i class="fa-solid fa-chevron-up"></i> Collapse`;
+      }else{
+        body.setAttribute("hidden", "");
+        toggle.innerHTML = `<i class="fa-solid fa-chevron-down"></i> Expand`;
+      }
+    });
+  }
+
+  if(copyBtn && card){
+    copyBtn.addEventListener("click", async ()=>{
+      const url = card.getAttribute("data-url") || "";
+      try{
+        await navigator.clipboard.writeText(url);
+        if(status) status.textContent = "Copied.";
+        setTimeout(()=>{ if(status) status.textContent = ""; }, 1200);
+      }catch(e){
+        if(status) status.textContent = "Copy failed (browser blocked).";
+        setTimeout(()=>{ if(status) status.textContent = ""; }, 1800);
+      }
+    });
+  }
+
+  if(jumpBtn){
+    jumpBtn.addEventListener("click", ()=>{
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
   }
 }
 
@@ -609,9 +531,7 @@ window.addEventListener("DOMContentLoaded", async ()=>{
 
   initTheme();
   initPhoto();
-
-  // Featured LinkedIn interactive card
-  initLinkedInFeatured();
+  initFeaturedLinkedIn();
 
   loadPubReview();
 
