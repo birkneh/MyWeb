@@ -10,23 +10,30 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
   <link rel="stylesheet" href="./styles.css" />
+
+  <!-- Prevent fixed topbar from covering section headings when jumping to anchors -->
+  <style>
+    section[id]{ scroll-margin-top: 110px; }
+  </style>
 </head>
 
 <body>
   <!-- Fixed top bar -->
- <header class="topbar">
-  <div class="topbar-inner">
-    <a class="brand" href="#about">
-      <span class="brand-dot"></span>
-      <span class="brand-text">About</span>
-    </a>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="#about">
+        <span class="brand-dot"></span>
+        <span class="brand-text">About</span>
+      </a>
 
       <nav class="nav">
+        <a class="navlink" href="#about">About</a>
         <a class="navlink" href="#summary">Summary</a>
         <a class="navlink" href="#experience">Experience</a>
         <a class="navlink" href="#education">Education</a>
         <a class="navlink" href="#grants">Grants</a>
         <a class="navlink" href="#publications">Publications</a>
+        <a class="navlink" href="#blogs">Blogs</a>
       </nav>
 
       <div class="top-actions">
@@ -71,7 +78,6 @@
             <a class="chip chip-cv" href="./Tadesse_CV_4FEB26.pdf" target="_blank" rel="noreferrer">
               <i class="fa-solid fa-file-lines"></i> CV (PDF)
             </a>
-            </a>
           </div>
         </div>
 
@@ -85,77 +91,50 @@
           </div>
         </div>
 
-          <div class="hero-meta">
-            <div class="meta-row">
-              <span class="meta-label">Last updated</span>
-              <span class="meta-value" id="last-updated">—</span>
-            </div>
-            <div class="meta-row">
-              <span class="meta-label">Location</span>
-              <span class="meta-value">Seoul, Republic of Korea</span>
-            </div>
+        <div class="hero-meta">
+          <div class="meta-row">
+            <span class="meta-label">Last updated</span>
+            <span class="meta-value" id="last-updated">—</span>
+          </div>
+          <div class="meta-row">
+            <span class="meta-label">Location</span>
+            <span class="meta-value">Seoul, Republic of Korea</span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- SECTION TABS (pretty, not ugly) -->
-    <section class="tabs">
-      <div class="tabs-inner">
-        <button class="tab active" type="button" data-tab="cv">Curriculum Vitae</button>
-        <button class="tab" type="button" data-tab="pubs">Publications</button>
-      </div>
-    </section>
-
-    <!-- CV CONTENT -->
-    <section id="cv" class="content active">
+    <!-- ONE PAGE CONTENT (CV + Publications together) -->
+    <section class="content active">
       <div class="grid-2">
         <!-- LEFT COLUMN -->
         <div class="col">
-          <!-- CV CONTENT -->
-<section id="cv" class="content active">
-  <div class="grid-2">
-    <!-- LEFT COLUMN -->
-    <div class="col">
 
-      <section id="about" class="card">
-        <div class="card-h">
-          <h2>About</h2>
-          <span class="pill">Profile</span>
-        </div>
+          <section id="about" class="card">
+            <div class="card-h">
+              <h2>About</h2>
+              <span class="pill">Profile</span>
+            </div>
 
-        <div class="prose">
-          <p>
-            Physician–epidemiologist and global health leader with two decades of experience advancing vaccine development,
-            evaluation, and implementation across Africa, Asia, and Europe. Expertise spans clinical trials, real-world
-            effectiveness, disease-burden estimation, and policy translation, with a strong record of guiding multidisciplinary
-            teams and multi-country partnerships from study design to public-health impact. Combines rigorous quantitative
-            epidemiology with strategic leadership to accelerate evidence generation, inform global immunization policy, and
-            strengthen research capacity in resource-limited settings.
-          </p>
+            <div class="prose">
+              <p>
+                Physician–epidemiologist and global health leader with two decades of experience advancing vaccine development,
+                evaluation, and implementation across Africa, Asia, and Europe. Expertise spans clinical trials, real-world
+                effectiveness, disease-burden estimation, and policy translation, with a strong record of guiding multidisciplinary
+                teams and multi-country partnerships from study design to public-health impact. Combines rigorous quantitative
+                epidemiology with strategic leadership to accelerate evidence generation, inform global immunization policy, and
+                strengthen research capacity in resource-limited settings.
+              </p>
 
-          <h3 style="margin-top:14px;">35-word Headline</h3>
-          <p>
-            Global vaccine epidemiologist and clinical development leader driving evidence from trials to policy—advancing
-            vaccine impact, effectiveness, and access through rigorous analytics, multi-country collaboration, and strategic
-            leadership across global health programs and complex research environments.
-          </p>
-        </div>
-      </section>
+              <h3 style="margin-top:14px;">35-word Headline</h3>
+              <p>
+                Global vaccine epidemiologist and clinical development leader driving evidence from trials to policy—advancing
+                vaccine impact, effectiveness, and access through rigorous analytics, multi-country collaboration, and strategic
+                leadership across global health programs and complex research environments.
+              </p>
+            </div>
+          </section>
 
-      <section id="summary" class="card">
-        <div class="card-h">
-          <h2>Summary</h2>
-          <span class="pill">Highlights</span>
-        </div>
-        <ul class="list">
-          <li>Experienced epidemiologist with track record in vaccine development (licensed typhoid conjugate vaccine; schistosomiasis vaccine under clinical development).</li>
-          <li>Clinical scientist and health professional with 20 years in clinical care, research, academia, and leadership.</li>
-          <li>Strong technical base in epidemiology, biostatistics, clinical medicine, infectious diseases, vaccinology, and product clinical development.</li>
-          <li>Leadership training; collaborative across governments, funders, academia, and delivery partners.</li>
-          <li>Proven delivery of complex programs and multi-country studies.</li>
-        </ul>
-      </section>
           <section id="summary" class="card">
             <div class="card-h">
               <h2>Summary</h2>
@@ -242,8 +221,8 @@
                 </div>
               </div>
 
-              <!-- Add all earlier academic & clinical leadership roles here (NOT collapsed).
-                   If you want, paste the remaining roles and I’ll drop them in exactly. -->
+              <!-- Add remaining roles below -->
+            </div>
           </section>
 
           <section id="education" class="card">
@@ -290,10 +269,12 @@
               </div>
             </div>
           </section>
+
         </div>
 
         <!-- RIGHT COLUMN -->
         <div class="col">
+
           <section class="card">
             <div class="card-h">
               <h2>Skills</h2>
@@ -322,7 +303,6 @@
               <span class="pill">Main Grants</span>
             </div>
 
-            <!-- These entries match your CV PDF list; add more beneath if needed. -->
             <div class="cards">
               <div class="mini">
                 <div class="mini-top">
@@ -401,45 +381,53 @@
               <div class="lang"><b>French</b><span class="muted">Studying</span></div>
             </div>
           </section>
+
         </div>
       </div>
     </section>
 
-    <!-- PUBLICATIONS CONTENT -->
-    <section id="pubs" class="content">
-      <section id="publications" class="card">
-        <div class="card-h">
-          <h2>Peer Reviewed Publications</h2>
-          <span class="pill">Auto-fetch (PubMed) + fallback</span>
+    <!-- PUBLICATIONS (same page) -->
+    <section id="publications" class="card" style="margin-top: 18px;">
+      <div class="card-h">
+        <h2>Peer Reviewed Publications</h2>
+        <span class="pill">Auto-fetch (PubMed) + fallback</span>
+      </div>
+
+      <div class="pub-controls">
+        <div class="field">
+          <label for="pub-search">Search</label>
+          <input id="pub-search" type="search" placeholder="Title, journal, year, DOI, PMID…" />
         </div>
 
-        <div class="pub-controls">
-          <div class="field">
-            <label for="pub-search">Search</label>
-            <input id="pub-search" type="search" placeholder="Title, journal, year, DOI, PMID…" />
-          </div>
-
-          <div class="field">
-            <label for="pub-sort">Sort</label>
-            <select id="pub-sort">
-              <option value="year_desc">Year (new → old)</option>
-              <option value="year_asc">Year (old → new)</option>
-              <option value="title_asc">Title (A → Z)</option>
-            </select>
-          </div>
-
-          <button id="btn-refresh" class="btn btn-secondary" type="button">
-            <i class="fa-solid fa-rotate"></i> Refresh
-          </button>
-
-          <div class="status" id="pub-status">—</div>
+        <div class="field">
+          <label for="pub-sort">Sort</label>
+          <select id="pub-sort">
+            <option value="year_desc">Year (new → old)</option>
+            <option value="year_asc">Year (old → new)</option>
+            <option value="title_asc">Title (A → Z)</option>
+          </select>
         </div>
 
-        <div id="pub-list" class="pub-list"></div>
+        <button id="btn-refresh" class="btn btn-secondary" type="button">
+          <i class="fa-solid fa-rotate"></i> Refresh
+        </button>
 
-        <div class="muted small" style="margin-top:12px;">
-        </div>
-      </section>
+        <div class="status" id="pub-status">—</div>
+      </div>
+
+      <div id="pub-list" class="pub-list"></div>
+      <div class="muted small" style="margin-top:12px;"></div>
+    </section>
+
+    <!-- BLOGS (same page) -->
+    <section id="blogs" class="card" style="margin-top: 18px;">
+      <div class="card-h">
+        <h2>Blogs</h2>
+        <span class="pill">Coming soon</span>
+      </div>
+      <div class="muted">
+        Blog posts will appear here.
+      </div>
     </section>
 
     <footer class="footer">
@@ -451,20 +439,5 @@
   </main>
 
   <script src="./script.js"></script>
-
-  <script>
-    // Simple tab switcher (no collapse, no omissions)
-    const tabs = document.querySelectorAll(".tab");
-    const panels = document.querySelectorAll(".content");
-    tabs.forEach(t=>{
-      t.addEventListener("click", ()=>{
-        tabs.forEach(x=>x.classList.remove("active"));
-        panels.forEach(p=>p.classList.remove("active"));
-        t.classList.add("active");
-        document.getElementById(t.dataset.tab)?.classList.add("active");
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      });
-    });
-  </script>
 </body>
 </html>
