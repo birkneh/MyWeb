@@ -415,6 +415,20 @@
         <div class="status" id="pub-status">—</div>
       </div>
 
+      <div class="field">
+        <label for="pub-filter">Review</label>
+        <select id="pub-filter">
+          <option value="all">All</option>
+          <option value="unreviewed">Only unreviewed</option>
+          <option value="accepted">Only accepted</option>
+          <option value="rejected">Only rejected</option>
+        </select>
+      </div>
+      
+      <button id="btn-clear-review" class="btn btn-ghost" type="button" title="Clear all review decisions">
+        <i class="fa-solid fa-eraser"></i> Clear review
+      </button>
+
       <div id="pub-list" class="pub-list"></div>
       <div class="muted small" style="margin-top:12px;"></div>
     </section>
