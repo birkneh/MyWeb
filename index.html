@@ -104,6 +104,81 @@
       </div>
     </section>
 
+    <!-- FEATURED LINKEDIN -->
+<section id="featured" class="card card-wide">
+  <div class="card-h">
+    <h2>Featured</h2>
+    <span class="pill">LinkedIn</span>
+  </div>
+
+  <div class="li-card" id="li-card">
+    <div class="li-head">
+      <div class="li-badge">
+        <i class="fa-brands fa-linkedin"></i>
+        <span>Recent post</span>
+      </div>
+
+      <button class="li-toggle" id="li-toggle" type="button" aria-expanded="false">
+        <span>Show preview</span>
+        <i class="fa-solid fa-chevron-down"></i>
+      </button>
+    </div>
+
+    <div class="li-main">
+      <div class="li-text">
+        <h3 class="li-title" id="li-title">Featured LinkedIn post</h3>
+        <div class="li-meta">
+          <span id="li-date">—</span>
+          <span class="dot">•</span>
+          <span id="li-domain">linkedin.com</span>
+        </div>
+
+        <p class="li-excerpt" id="li-excerpt">
+          Open the post on LinkedIn for the full interactive experience (comments, reactions, shares).
+        </p>
+
+        <div class="li-actions">
+          <a id="li-open" class="btn btn-primary" target="_blank" rel="noreferrer">
+            <i class="fa-brands fa-linkedin"></i> Open on LinkedIn
+          </a>
+
+          <button id="li-copy" class="btn btn-ghost" type="button">
+            <i class="fa-regular fa-copy"></i> Copy link
+          </button>
+
+          <a id="li-share" class="btn btn-secondary" target="_blank" rel="noreferrer">
+            <i class="fa-solid fa-share-nodes"></i> Share
+          </a>
+        </div>
+      </div>
+
+      <div class="li-media">
+        <a id="li-thumb-link" target="_blank" rel="noreferrer" class="li-thumb">
+          <img id="li-thumb" alt="LinkedIn post preview" />
+          <div class="li-thumb-fallback">
+            <i class="fa-brands fa-linkedin"></i>
+            <div>
+              <div class="li-fb-title">Interactive preview</div>
+              <div class="li-fb-sub muted">Click to view on LinkedIn</div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="li-expand" id="li-expand" hidden>
+      <div class="li-preview-note muted">
+        Preview cards depend on what LinkedIn allows browsers to fetch. If the preview doesn’t load, the buttons still work.
+      </div>
+
+      <!-- Optional “embed attempt” (usually blocked). We only show if it loads. -->
+      <div class="li-embedwrap" id="li-embedwrap" hidden>
+        <iframe id="li-iframe" title="LinkedIn embed" loading="lazy"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
     <!-- CV GRID -->
     <section class="content">
       <div class="grid-2">
