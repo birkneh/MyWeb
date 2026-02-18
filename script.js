@@ -7,7 +7,6 @@ const PUBMED_AUTHOR_QUERY =
   `(birkneh tilahun tadesse[Author] OR birkneh tilahun[Author] or tadesse bt[Author])`;
 
 // Optional “bad-fit” keywords to exclude (title/abstract)
-// (Keep short; too many exclusions can remove valid items)
 const EXCLUDE_TITLE_ABSTRACT = [
   `"food safety"[Title/Abstract]`,
   `"foodborne"[Title/Abstract]`
@@ -22,34 +21,28 @@ const LOCAL_PUBLICATIONS_JSON = "./publications.json";
 // Toggle: auto fetch PubMed on load
 const AUTO_FETCH_PUBMED_ON_LOAD = true;
 
-// ===== Publication review / curation =====
-const PUB_REVIEW_STORAGE_KEY = "pub_review_v1"; // localStorage key
-// review state: { [key]: "accepted" | "rejected" }
-let PUB_REVIEW = {};
+/* =========================================================
+   PUBLICATION REVIEW (ACCEPT/REJECT)
+   ========================================================= */
 
+const PUB_REVIEW_STORAGE_KEY = "pub_review_v1"; // persists on GitHub Pages
+let PUB_REVIEW = {}; // { key: "accepted" | "rejected" }
 function loadPubReview(){
-  try{
-    PUB_REVIEW = JSON.parse(localStorage.getItem(PUB_REVIEW_STORAGE_KEY) || "{}") || {};
-  }catch(e){
-    PUB_REVIEW = {};
-   loadPubReview();
-  }
+  try{ PUB_REVIEW = JSON.parse(localStorage.getItem(PUB_REVIEW_STORAGE_KEY) || "{}") || {}; }
+  catch(e){ PUB_REVIEW = {}; }
 }
 function savePubReview(){
   localStorage.setItem(PUB_REVIEW_STORAGE_KEY, JSON.stringify(PUB_REVIEW));
 }
-
 function pubKey(p){
-  // stable key for a pub item
   if(p.doi) return `doi:${String(p.doi).toLowerCase().replace(/^https?:\/\/(dx\.)?doi\.org\//i,"").trim()}`;
   if(p.pmid) return `pmid:${String(p.pmid).trim()}`;
   return `t:${String(p.title||p.citation||"").toLowerCase().replace(/\s+/g," ").slice(0,160)}`;
 }
-
 function getReviewState(p){
   return PUB_REVIEW[pubKey(p)] || "unreviewed";
 }
-function setReviewState(p, state){ // state: accepted | rejected | unreviewed
+function setReviewState(p, state){ // accepted | rejected | unreviewed
   const k = pubKey(p);
   if(state === "unreviewed") delete PUB_REVIEW[k];
   else PUB_REVIEW[k] = state;
@@ -59,6 +52,7 @@ function setReviewState(p, state){ // state: accepted | rejected | unreviewed
 /* =========================================================
    UTIL
    ========================================================= */
+
 function esc(s){
   return String(s ?? "").replace(/[&<>"]/g, c => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"
@@ -123,6 +117,7 @@ function filterPublications(list, q){
 /* =========================================================
    RENDER
    ========================================================= */
+
 let PUBS = [];
 
 function renderPublications(){
@@ -131,24 +126,36 @@ function renderPublications(){
 
   const search = document.getElementById("pub-search")?.value || "";
   const sortMode = document.getElementById("pub-sort")?.value || "year_desc";
+  const reviewMode = document.getElementById("pub-filter")?.value || "all";
 
   const filtered = filterPublications(PUBS, search);
-   const sortedAll = sortPublications(filtered, sortMode);
-   
-   const reviewMode = document.getElementById("pub-filter")?.value || "all";
-   const sorted = sortedAll.filter(p=>{
-     const st = getReviewState(p);
-     if(reviewMode === "accepted") return st === "accepted";
-     if(reviewMode === "rejected") return st === "rejected";
-     if(reviewMode === "unreviewed") return st === "unreviewed";
-     return st !== "rejected"; // default: hide rejected from normal "All" view
-   });
+  const sortedAll = sortPublications(filtered, sortMode);
+
+  // Review filtering
+  const sorted = sortedAll.filter(p=>{
+    const st = getReviewState(p);
+    if(reviewMode === "accepted") return st === "accepted";
+    if(reviewMode === "rejected") return st === "rejected";
+    if(reviewMode === "unreviewed") return st === "unreviewed";
+    // default "all": hide rejected
+    return st !== "rejected";
+  });
+
   listEl.innerHTML = "";
 
   if(sorted.length === 0){
     listEl.innerHTML = `<div class="muted">No publications found.</div>`;
     setStatus("No publications found.");
     return;
+  }
+
+  // counts for status
+  let nAccepted = 0, nRejected = 0, nUnreviewed = 0;
+  for(const p of sortedAll){
+    const st = getReviewState(p);
+    if(st === "accepted") nAccepted++;
+    else if(st === "rejected") nRejected++;
+    else nUnreviewed++;
   }
 
   for(const p of sorted){
@@ -188,50 +195,6 @@ function renderPublications(){
 
     const links = document.createElement("div");
     links.className = "pub-links";
-
-     const reviewBar = document.createElement("div");
-   reviewBar.className = "pub-links"; // reuse styling
-   
-   const state = getReviewState(p);
-   
-   const btnAccept = document.createElement("button");
-   btnAccept.type = "button";
-   btnAccept.className = "pub-link";
-   btnAccept.innerHTML = `<i class="fa-solid fa-check"></i> Accept`;
-   btnAccept.style.opacity = (state === "accepted") ? "1" : "0.7";
-   
-   const btnReject = document.createElement("button");
-   btnReject.type = "button";
-   btnReject.className = "pub-link";
-   btnReject.innerHTML = `<i class="fa-solid fa-xmark"></i> Reject`;
-   btnReject.style.opacity = (state === "rejected") ? "1" : "0.7";
-   
-   const btnReset = document.createElement("button");
-   btnReset.type = "button";
-   btnReset.className = "pub-link";
-   btnReset.innerHTML = `<i class="fa-solid fa-rotate-left"></i> Undo`;
-   btnReset.style.opacity = (state === "unreviewed") ? "0.6" : "0.9";
-   
-   btnAccept.addEventListener("click", ()=>{
-  setReviewState(p, "accepted");
-  renderPublications();
-});
-
-btnReject.addEventListener("click", ()=>{
-  setReviewState(p, "rejected");
-  renderPublications();
-});
-
-btnReset.addEventListener("click", ()=>{
-  setReviewState(p, "unreviewed");
-  renderPublications();
-});
-
-reviewBar.appendChild(btnAccept);
-reviewBar.appendChild(btnReject);
-reviewBar.appendChild(btnReset);
-
-wrapper.appendChild(reviewBar);
 
     if(p.doi){
       const a = document.createElement("a");
@@ -287,9 +250,46 @@ wrapper.appendChild(reviewBar);
     aCR.innerHTML = `<i class="fa-solid fa-magnifying-glass"></i> Crossref`;
     links.appendChild(aCR);
 
+    // Review actions
+    const reviewBar = document.createElement("div");
+    reviewBar.className = "pub-links";
+
+    const state = getReviewState(p);
+
+    const btnAccept = document.createElement("button");
+    btnAccept.type = "button";
+    btnAccept.className = "pub-link" + (state === "accepted" ? " accepted" : "");
+    btnAccept.innerHTML = `<i class="fa-solid fa-check"></i> Accept`;
+    btnAccept.addEventListener("click", ()=>{
+      setReviewState(p, "accepted");
+      renderPublications();
+    });
+
+    const btnReject = document.createElement("button");
+    btnReject.type = "button";
+    btnReject.className = "pub-link" + (state === "rejected" ? " rejected" : "");
+    btnReject.innerHTML = `<i class="fa-solid fa-xmark"></i> Reject`;
+    btnReject.addEventListener("click", ()=>{
+      setReviewState(p, "rejected");
+      renderPublications();
+    });
+
+    const btnUndo = document.createElement("button");
+    btnUndo.type = "button";
+    btnUndo.className = "pub-link";
+    btnUndo.innerHTML = `<i class="fa-solid fa-rotate-left"></i> Undo`;
+    btnUndo.addEventListener("click", ()=>{
+      setReviewState(p, "unreviewed");
+      renderPublications();
+    });
+
+    reviewBar.appendChild(btnAccept);
+    reviewBar.appendChild(btnReject);
+    reviewBar.appendChild(btnUndo);
+
     wrapper.appendChild(top);
 
-    if(p.citation && p.citation.trim()){
+    if(p.citation && String(p.citation).trim()){
       const c = document.createElement("div");
       c.className = "pub-meta";
       c.style.marginTop = "6px";
@@ -298,15 +298,17 @@ wrapper.appendChild(reviewBar);
     }
 
     wrapper.appendChild(links);
+    wrapper.appendChild(reviewBar);
     listEl.appendChild(wrapper);
   }
 
-  setStatus(`Showing ${sorted.length} publication(s).`);
+  setStatus(`Showing ${sorted.length}. Review: ${nAccepted} accepted • ${nUnreviewed} unreviewed • ${nRejected} rejected.`);
 }
 
 /* =========================================================
    LOADING: LOCAL FALLBACK
    ========================================================= */
+
 async function loadLocalPublications(){
   try{
     const res = await fetch(LOCAL_PUBLICATIONS_JSON, { cache: "no-store" });
@@ -323,6 +325,7 @@ async function loadLocalPublications(){
 /* =========================================================
    LOADING: PUBMED (ONLINE)
    ========================================================= */
+
 function buildPubMedQuery(){
   const exclPart = EXCLUDE_TITLE_ABSTRACT.length
     ? ` NOT (${EXCLUDE_TITLE_ABSTRACT.join(" OR ")})`
@@ -389,6 +392,7 @@ async function fetchPubMed(){
 /* =========================================================
    MERGE & DEDUPE
    ========================================================= */
+
 function dedupePubs(pubs){
   const seen = new Set();
   const out = [];
@@ -455,6 +459,7 @@ async function loadPublications({preferPubMed=true}={}){
 /* =========================================================
    THEME + PHOTO PLACEHOLDER
    ========================================================= */
+
 function initTheme(){
   const btn = document.getElementById("btn-theme");
   if(!btn) return;
@@ -473,10 +478,14 @@ function initPhoto(){
   const fallback = document.querySelector(".photo-fallback");
   if(!img || !fallback) return;
 
-  // Put your photo here (example)
-  // img.src = "./assets/profile.jpg";
+  // Use image2.jpg if present (already in HTML). If it fails, fallback shows.
+  img.addEventListener("error", ()=>{
+    img.style.display = "none";
+    fallback.style.display = "flex";
+  });
 
-  if(img.src && img.src.trim() && !img.src.endsWith("/")){
+  // If src looks valid, show it
+  if(img.src && img.src.trim()){
     img.style.display = "block";
     fallback.style.display = "none";
   } else {
@@ -485,59 +494,10 @@ function initPhoto(){
   }
 }
 
-function openPublicationsIfHash(){
-  const hash = (location.hash || "").replace("#", "").toLowerCase();
-  if(hash === "publications" || hash === "pubs"){
-    // Activate the Publications tab
-    const pubsTab = document.querySelector('.tab[data-tab="pubs"]');
-    if(pubsTab) pubsTab.click();
-
-    // Scroll to the publications card
-    requestAnimationFrame(() => {
-      document.getElementById("publications")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-  }
-}
-
-// --- Fix top navigation so it always opens the correct panel ---
-function bindTopNavFix(){
-  const navLinks = document.querySelectorAll(".navlink");
-  const clickTab = (name) => document.querySelector(`.tab[data-tab="${name}"]`)?.click();
-
-  navLinks.forEach(a => {
-    a.addEventListener("click", (e) => {
-      const href = a.getAttribute("href") || "";
-      if(!href.startsWith("#")) return;
-
-      const id = href.slice(1);
-
-      if (id === "publications" || id === "pubs") {
-        e.preventDefault();
-        clickTab("pubs");
-        history.replaceState(null, "", "#publications");
-        requestAnimationFrame(() => {
-          document.getElementById("publications")?.scrollIntoView({ behavior: "smooth", block: "start" });
-        });
-        return;
-      }
-
-      if (["summary", "experience", "education", "grants", "top"].includes(id)) {
-        e.preventDefault();
-        clickTab("cv");
-        history.replaceState(null, "", `#${id}`);
-        requestAnimationFrame(() => {
-          const el = document.getElementById(id);
-          if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
-          else window.scrollTo({ top: 0, behavior: "smooth" });
-        });
-      }
-    });
-  });
-}
-
 /* =========================================================
    BOOT
    ========================================================= */
+
 window.addEventListener("DOMContentLoaded", async ()=>{
   document.getElementById("year-now").textContent = new Date().getFullYear();
   document.getElementById("last-updated").textContent = new Date().toLocaleDateString();
@@ -545,33 +505,27 @@ window.addEventListener("DOMContentLoaded", async ()=>{
   initTheme();
   initPhoto();
 
-  // Fix top navigation + direct hash loads
-  bindTopNavFix();
+  loadPubReview();
 
-  // initial load
   PUBS = await loadPublications({ preferPubMed: AUTO_FETCH_PUBMED_ON_LOAD });
   renderPublications();
 
-  // open pubs panel if URL has #publications
-  openPublicationsIfHash();
-
   document.getElementById("pub-search")?.addEventListener("input", renderPublications);
   document.getElementById("pub-sort")?.addEventListener("change", renderPublications);
+  document.getElementById("pub-filter")?.addEventListener("change", renderPublications);
 
-  // refresh button: fetch from PubMed again
   document.getElementById("btn-refresh")?.addEventListener("click", async ()=>{
     setStatus("Refreshing from PubMed…");
     PUBS = await loadPublications({ preferPubMed: true });
     document.getElementById("last-updated").textContent = new Date().toLocaleString();
     renderPublications();
   });
-});
-document.getElementById("pub-filter")?.addEventListener("change", renderPublications);
 
-document.getElementById("btn-clear-review")?.addEventListener("click", ()=>{
-  if(confirm("Clear all Accept/Reject decisions?")) {
+  document.getElementById("btn-clear-review")?.addEventListener("click", ()=>{
+    const ok = confirm("Clear all Accept/Reject decisions?");
+    if(!ok) return;
     PUB_REVIEW = {};
     savePubReview();
     renderPublications();
-  }
+  });
 });
