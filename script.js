@@ -22,6 +22,40 @@ const LOCAL_PUBLICATIONS_JSON = "./publications.json";
 // Toggle: auto fetch PubMed on load
 const AUTO_FETCH_PUBMED_ON_LOAD = true;
 
+// ===== Publication review / curation =====
+const PUB_REVIEW_STORAGE_KEY = "pub_review_v1"; // localStorage key
+// review state: { [key]: "accepted" | "rejected" }
+let PUB_REVIEW = {};
+
+function loadPubReview(){
+  try{
+    PUB_REVIEW = JSON.parse(localStorage.getItem(PUB_REVIEW_STORAGE_KEY) || "{}") || {};
+  }catch(e){
+    PUB_REVIEW = {};
+   loadPubReview();
+  }
+}
+function savePubReview(){
+  localStorage.setItem(PUB_REVIEW_STORAGE_KEY, JSON.stringify(PUB_REVIEW));
+}
+
+function pubKey(p){
+  // stable key for a pub item
+  if(p.doi) return `doi:${String(p.doi).toLowerCase().replace(/^https?:\/\/(dx\.)?doi\.org\//i,"").trim()}`;
+  if(p.pmid) return `pmid:${String(p.pmid).trim()}`;
+  return `t:${String(p.title||p.citation||"").toLowerCase().replace(/\s+/g," ").slice(0,160)}`;
+}
+
+function getReviewState(p){
+  return PUB_REVIEW[pubKey(p)] || "unreviewed";
+}
+function setReviewState(p, state){ // state: accepted | rejected | unreviewed
+  const k = pubKey(p);
+  if(state === "unreviewed") delete PUB_REVIEW[k];
+  else PUB_REVIEW[k] = state;
+  savePubReview();
+}
+
 /* =========================================================
    UTIL
    ========================================================= */
@@ -99,8 +133,16 @@ function renderPublications(){
   const sortMode = document.getElementById("pub-sort")?.value || "year_desc";
 
   const filtered = filterPublications(PUBS, search);
-  const sorted = sortPublications(filtered, sortMode);
-
+   const sortedAll = sortPublications(filtered, sortMode);
+   
+   const reviewMode = document.getElementById("pub-filter")?.value || "all";
+   const sorted = sortedAll.filter(p=>{
+     const st = getReviewState(p);
+     if(reviewMode === "accepted") return st === "accepted";
+     if(reviewMode === "rejected") return st === "rejected";
+     if(reviewMode === "unreviewed") return st === "unreviewed";
+     return st !== "rejected"; // default: hide rejected from normal "All" view
+   });
   listEl.innerHTML = "";
 
   if(sorted.length === 0){
@@ -146,6 +188,50 @@ function renderPublications(){
 
     const links = document.createElement("div");
     links.className = "pub-links";
+
+     const reviewBar = document.createElement("div");
+   reviewBar.className = "pub-links"; // reuse styling
+   
+   const state = getReviewState(p);
+   
+   const btnAccept = document.createElement("button");
+   btnAccept.type = "button";
+   btnAccept.className = "pub-link";
+   btnAccept.innerHTML = `<i class="fa-solid fa-check"></i> Accept`;
+   btnAccept.style.opacity = (state === "accepted") ? "1" : "0.7";
+   
+   const btnReject = document.createElement("button");
+   btnReject.type = "button";
+   btnReject.className = "pub-link";
+   btnReject.innerHTML = `<i class="fa-solid fa-xmark"></i> Reject`;
+   btnReject.style.opacity = (state === "rejected") ? "1" : "0.7";
+   
+   const btnReset = document.createElement("button");
+   btnReset.type = "button";
+   btnReset.className = "pub-link";
+   btnReset.innerHTML = `<i class="fa-solid fa-rotate-left"></i> Undo`;
+   btnReset.style.opacity = (state === "unreviewed") ? "0.6" : "0.9";
+   
+   btnAccept.addEventListener("click", ()=>{
+  setReviewState(p, "accepted");
+  renderPublications();
+});
+
+btnReject.addEventListener("click", ()=>{
+  setReviewState(p, "rejected");
+  renderPublications();
+});
+
+btnReset.addEventListener("click", ()=>{
+  setReviewState(p, "unreviewed");
+  renderPublications();
+});
+
+reviewBar.appendChild(btnAccept);
+reviewBar.appendChild(btnReject);
+reviewBar.appendChild(btnReset);
+
+wrapper.appendChild(reviewBar);
 
     if(p.doi){
       const a = document.createElement("a");
@@ -479,4 +565,13 @@ window.addEventListener("DOMContentLoaded", async ()=>{
     document.getElementById("last-updated").textContent = new Date().toLocaleString();
     renderPublications();
   });
+});
+document.getElementById("pub-filter")?.addEventListener("change", renderPublications);
+
+document.getElementById("btn-clear-review")?.addEventListener("click", ()=>{
+  if(confirm("Clear all Accept/Reject decisions?")) {
+    PUB_REVIEW = {};
+    savePubReview();
+    renderPublications();
+  }
 });
