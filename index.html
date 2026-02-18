@@ -11,14 +11,13 @@
 
   <link rel="stylesheet" href="./styles.css" />
 
-  <!-- Prevent fixed topbar from covering anchored sections -->
   <style>
-    section[id]{ scroll-margin-top: 110px; }
+    section[id]{ scroll-margin-top: 110px; } /* fixes anchor jump under fixed header */
   </style>
 </head>
 
 <body>
-  <!-- Top bar -->
+  <!-- Fixed top bar -->
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="#about" aria-label="Go to About">
@@ -41,7 +40,6 @@
           <i class="fa-solid fa-circle-half-stroke"></i>
           <span class="hide-sm">Theme</span>
         </button>
-
         <a class="btn btn-primary" href="mailto:birknehtilahun@gmail.com">
           <i class="fa-solid fa-envelope"></i>
           <span class="hide-sm">Email</span>
@@ -51,6 +49,7 @@
   </header>
 
   <main id="top" class="page">
+
     <!-- HERO -->
     <section class="hero">
       <div class="hero-card">
@@ -84,7 +83,6 @@
 
         <div class="hero-right">
           <div class="photo">
-            <!-- Requirement #3: use image2.jpg -->
             <img id="profile-photo" src="./image2.jpg" alt="Birkneh T. Tadesse" />
             <div class="photo-fallback" aria-hidden="true">
               <div class="photo-initials">BT</div>
@@ -106,10 +104,11 @@
       </div>
     </section>
 
-    <!-- CONTENT -->
+    <!-- CV GRID -->
     <section class="content">
       <div class="grid-2">
-        <!-- LEFT -->
+
+        <!-- LEFT COLUMN -->
         <div class="col">
           <section id="about" class="card">
             <div class="card-h">
@@ -269,7 +268,7 @@
           </section>
         </div>
 
-        <!-- RIGHT -->
+        <!-- RIGHT COLUMN -->
         <div class="col">
           <section class="card">
             <div class="card-h">
@@ -284,7 +283,7 @@
 
             <div class="skill-block">
               <h3>Research & development</h3>
-              <p>Clinical trials (Phase I–IV); cluster RCTs; real-world evidence; causal inference; protocol/SAP; regulatory/ethics; scientific writing (CSR/CTD/manuscripts/grants).</p>
+              <p>Quantitative epidemiology; clinical trials (Phase I–IV); cluster RCTs; real-world evidence; causal inference; protocol/SAP; regulatory/ethics; scientific writing (CSR/CTD/manuscripts/grants).</p>
             </div>
 
             <div class="skill-block">
@@ -378,10 +377,11 @@
             </div>
           </section>
         </div>
+
       </div>
     </section>
 
-    <!-- PUBLICATIONS (same page) -->
+    <!-- PUBLICATIONS (same page, below CV) -->
     <section id="publications" class="card card-wide">
       <div class="card-h">
         <h2>Peer Reviewed Publications</h2>
@@ -427,15 +427,13 @@
       <div id="pub-list" class="pub-list"></div>
     </section>
 
-    <!-- BLOGS (same page) -->
+    <!-- BLOGS -->
     <section id="blogs" class="card card-wide">
       <div class="card-h">
         <h2>Blogs</h2>
         <span class="pill">Coming soon</span>
       </div>
-      <div class="muted">
-        Blog posts will appear here.
-      </div>
+      <div class="muted">Blog posts will appear here.</div>
     </section>
 
     <footer class="footer">
@@ -444,6 +442,7 @@
         <span class="muted"></span>
       </div>
     </footer>
+
   </main>
 
   <script src="./script.js"></script>
