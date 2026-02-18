@@ -11,42 +11,22 @@
 
   <link rel="stylesheet" href="./styles.css" />
 
-  <!-- Prevent fixed topbar from covering section headings when jumping to anchors -->
+  <!-- Prevent fixed topbar from covering anchored sections -->
   <style>
-    :root{ --topbar-h: 84px; }
-    section[id]{ scroll-margin-top: calc(var(--topbar-h) + 18px); }
-
-    /* Minimal responsive helpers (safe even if styles.css is unchanged) */
-    .hide-sm{ display:inline; }
-    @media (max-width: 820px){
-      :root{ --topbar-h: 64px; }
-      .hide-sm{ display:none; }
-      .nav{ display:none; }
-      .nav.is-open{ display:flex; }
-      .topbar-inner{ gap: 10px; }
-      .hero-card{ display:block; }
-      .hero-right{ margin-top: 14px; }
-      .grid-2{ display:block; }
-    }
+    section[id]{ scroll-margin-top: 110px; }
   </style>
 </head>
 
 <body>
-  <!-- Fixed top bar -->
-  <header class="topbar" role="banner">
+  <!-- Top bar -->
+  <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="#about" aria-label="Go to About">
-        <span class="brand-dot" aria-hidden="true"></span>
+        <span class="brand-dot"></span>
         <span class="brand-text">About</span>
       </a>
 
-      <!-- Mobile menu button -->
-      <button id="btn-menu" class="btn btn-ghost" type="button" aria-label="Toggle navigation" aria-expanded="false">
-        <i class="fa-solid fa-bars"></i>
-        <span class="hide-sm">Menu</span>
-      </button>
-
-      <nav id="site-nav" class="nav" aria-label="Primary navigation">
+      <nav class="nav" aria-label="Primary">
         <a class="navlink" href="#about">About</a>
         <a class="navlink" href="#summary">Summary</a>
         <a class="navlink" href="#experience">Experience</a>
@@ -61,6 +41,7 @@
           <i class="fa-solid fa-circle-half-stroke"></i>
           <span class="hide-sm">Theme</span>
         </button>
+
         <a class="btn btn-primary" href="mailto:birknehtilahun@gmail.com">
           <i class="fa-solid fa-envelope"></i>
           <span class="hide-sm">Email</span>
@@ -69,9 +50,9 @@
     </div>
   </header>
 
-  <main id="top" class="page" role="main">
+  <main id="top" class="page">
     <!-- HERO -->
-    <section class="hero" aria-label="Header">
+    <section class="hero">
       <div class="hero-card">
         <div class="hero-left">
           <div class="title">
@@ -79,15 +60,14 @@
             <p class="subtitle">Epidemiology • Clinical Development • Vaccine Impact • Global Health Leadership</p>
           </div>
 
-          <div class="chips" aria-label="Quick links">
+          <div class="chips">
             <a class="chip" target="_blank" rel="noreferrer" href="https://linkedin.com/in/birkneh-t-tadesse-7b542ba3">
               <i class="fa-brands fa-linkedin"></i> LinkedIn
             </a>
             <a class="chip" target="_blank" rel="noreferrer" href="https://scholar.google.com/citations?hl=en">
               <i class="fa-solid fa-graduation-cap"></i> Google Scholar
             </a>
-            <a class="chip" target="_blank" rel="noreferrer"
-               href="https://pubmed.ncbi.nlm.nih.gov/?term=birkneh+tadesse+or+birkneh+tilahun&sort=date">
+            <a class="chip" target="_blank" rel="noreferrer" href="https://pubmed.ncbi.nlm.nih.gov/?term=birkneh+tadesse+or+birkneh+tilahun&sort=date">
               <i class="fa-solid fa-database"></i> PubMed
             </a>
             <a class="chip" href="mailto:birknehtilahun@gmail.com">
@@ -104,11 +84,11 @@
 
         <div class="hero-right">
           <div class="photo">
-            <!-- Use image.jpeg (GitHub Pages: file must be in repo root next to index.html) -->
-            <img id="profile-photo" src="./image.jpeg" alt="Birkneh T. Tadesse" loading="lazy" />
-            <div class="photo-fallback" id="photo-fallback" aria-hidden="true" style="display:none;">
+            <!-- Requirement #3: use image2.jpg -->
+            <img id="profile-photo" src="./image2.jpg" alt="Birkneh T. Tadesse" />
+            <div class="photo-fallback" aria-hidden="true">
               <div class="photo-initials">BT</div>
-              <div class="photo-note">Add <code>image.jpeg</code> next to <code>index.html</code></div>
+              <div class="photo-note">Place <code>image2.jpg</code> next to <code>index.html</code></div>
             </div>
           </div>
         </div>
@@ -126,17 +106,16 @@
       </div>
     </section>
 
-    <!-- ONE PAGE CONTENT -->
-    <section class="content active">
+    <!-- CONTENT -->
+    <section class="content">
       <div class="grid-2">
-        <!-- LEFT COLUMN -->
+        <!-- LEFT -->
         <div class="col">
           <section id="about" class="card">
             <div class="card-h">
               <h2>About</h2>
               <span class="pill">Profile</span>
             </div>
-
             <div class="prose">
               <p>
                 Physician–epidemiologist and global health leader with two decades of experience advancing vaccine development,
@@ -146,6 +125,8 @@
                 epidemiology with strategic leadership to accelerate evidence generation, inform global immunization policy, and
                 strengthen research capacity in resource-limited settings.
               </p>
+
+              <h3 style="margin-top:14px;">35-word Headline</h3>
               <p>
                 Global vaccine epidemiologist and clinical development leader driving evidence from trials to policy—advancing
                 vaccine impact, effectiveness, and access through rigorous analytics, multi-country collaboration, and strategic
@@ -154,8 +135,7 @@
             </div>
           </section>
 
-          <!-- ✅ Ensure Summary section exists + has correct anchor -->
-          <section id="summary" class="card" aria-label="Summary">
+          <section id="summary" class="card">
             <div class="card-h">
               <h2>Summary</h2>
               <span class="pill">Highlights</span>
@@ -240,8 +220,6 @@
                   </ul>
                 </div>
               </div>
-
-              <!-- Add remaining roles below -->
             </div>
           </section>
 
@@ -262,7 +240,7 @@
               <div class="edu-row">
                 <div class="edu-year">2015 – 2016</div>
                 <div class="edu-body">
-                  <h3>Clinical Research &amp; Development Fellowship</h3>
+                  <h3>Clinical Research & Development Fellowship</h3>
                   <div class="muted">WHO/TDR and FIND</div>
                 </div>
               </div>
@@ -291,7 +269,7 @@
           </section>
         </div>
 
-        <!-- RIGHT COLUMN -->
+        <!-- RIGHT -->
         <div class="col">
           <section class="card">
             <div class="card-h">
@@ -300,13 +278,13 @@
             </div>
 
             <div class="skill-block">
-              <h3>Data science &amp; analytics</h3>
-              <p>Python, R, SQL/SQLite, HTML, CSS, JavaScript (D3), Tableau</p>
+              <h3>Data science & analytics</h3>
+              <p>Python, R, SQL/SQLite, HTML, CSS, JavaScript, Tableau</p>
             </div>
 
             <div class="skill-block">
-              <h3>Research &amp; development</h3>
-              <p>Quantitative epidemiology; clinical trials (Phase I–IV); cluster RCTs; real-world evidence; causal inference; protocol/SAP; regulatory/ethics; scientific writing (CSR/CTD/manuscripts/grants).</p>
+              <h3>Research & development</h3>
+              <p>Clinical trials (Phase I–IV); cluster RCTs; real-world evidence; causal inference; protocol/SAP; regulatory/ethics; scientific writing (CSR/CTD/manuscripts/grants).</p>
             </div>
 
             <div class="skill-block">
@@ -324,15 +302,15 @@
             <div class="cards">
               <div class="mini">
                 <div class="mini-top">
-                  <h3>LC16m8 mpox vaccine effectiveness &amp; safety (DRC)</h3>
+                  <h3>LC16m8 mpox vaccine effectiveness & safety (DRC)</h3>
                   <span class="tag">CEPI</span>
                 </div>
-                <div class="mini-meta">Role: Scientific &amp; Technical Lead • $13M • 2025–2028</div>
+                <div class="mini-meta">Role: Scientific & Technical Lead • $13M • 2025–2028</div>
               </div>
 
               <div class="mini">
                 <div class="mini-top">
-                  <h3>Malaria vaccines &amp; invasive nontyphoidal Salmonella (VINS)</h3>
+                  <h3>Malaria vaccines & invasive nontyphoidal Salmonella (VINS)</h3>
                   <span class="tag">Gates</span>
                 </div>
                 <div class="mini-meta">Role: Principal Investigator • $2.0M • 2025–2027</div>
@@ -340,7 +318,7 @@
 
               <div class="mini">
                 <div class="mini-top">
-                  <h3>SCB-2019 COVID-19 vaccine &amp; household transmission</h3>
+                  <h3>SCB-2019 COVID-19 vaccine & household transmission</h3>
                   <span class="tag">CEPI</span>
                 </div>
                 <div class="mini-meta">Role: Principal Investigator • €2.5M • 2020–2023</div>
@@ -351,12 +329,12 @@
                   <h3>ECOVA — expanding access to COVID-19 vaccines in Africa</h3>
                   <span class="tag">CEPI</span>
                 </div>
-                <div class="mini-meta">Role: Co-Investigator &amp; Technical Lead • €10M • 2020–2024</div>
+                <div class="mini-meta">Role: Co-Investigator & Technical Lead • €10M • 2020–2024</div>
               </div>
 
               <div class="mini">
                 <div class="mini-top">
-                  <h3>PREGART trial (Ethiopia &amp; Uganda)</h3>
+                  <h3>PREGART trial (Ethiopia & Uganda)</h3>
                   <span class="tag">EDCTP2</span>
                 </div>
                 <div class="mini-meta">Role: Principal Investigator • €3,902,468.75 • 2018–2023</div>
@@ -403,11 +381,11 @@
       </div>
     </section>
 
-    <!-- PUBLICATIONS -->
-    <section id="publications" class="card" style="margin-top: 18px;">
+    <!-- PUBLICATIONS (same page) -->
+    <section id="publications" class="card card-wide">
       <div class="card-h">
         <h2>Peer Reviewed Publications</h2>
-        <span class="pill">Auto-fetch (PubMed) + fallback</span>
+        <span class="pill">PubMed auto-fetch + curation</span>
       </div>
 
       <div class="pub-controls">
@@ -425,41 +403,42 @@
           </select>
         </div>
 
+        <div class="field">
+          <label for="pub-filter">Review</label>
+          <select id="pub-filter">
+            <option value="all">All (hide rejected)</option>
+            <option value="unreviewed">Only unreviewed</option>
+            <option value="accepted">Only accepted</option>
+            <option value="rejected">Only rejected</option>
+          </select>
+        </div>
+
         <button id="btn-refresh" class="btn btn-secondary" type="button">
           <i class="fa-solid fa-rotate"></i> Refresh
+        </button>
+
+        <button id="btn-clear-review" class="btn btn-ghost" type="button" title="Clear review decisions">
+          <i class="fa-solid fa-eraser"></i> Clear review
         </button>
 
         <div class="status" id="pub-status">—</div>
       </div>
 
-      <div class="field">
-        <label for="pub-filter">Review</label>
-        <select id="pub-filter">
-          <option value="all">All</option>
-          <option value="unreviewed">Only unreviewed</option>
-          <option value="accepted">Only accepted</option>
-          <option value="rejected">Only rejected</option>
-        </select>
-      </div>
-
-      <button id="btn-clear-review" class="btn btn-ghost" type="button" title="Clear all review decisions">
-        <i class="fa-solid fa-eraser"></i> Clear review
-      </button>
-
       <div id="pub-list" class="pub-list"></div>
-      <div class="muted small" style="margin-top:12px;"></div>
     </section>
 
-    <!-- BLOGS -->
-    <section id="blogs" class="card" style="margin-top: 18px;">
+    <!-- BLOGS (same page) -->
+    <section id="blogs" class="card card-wide">
       <div class="card-h">
         <h2>Blogs</h2>
         <span class="pill">Coming soon</span>
       </div>
-      <div class="muted">Blog posts will appear here.</div>
+      <div class="muted">
+        Blog posts will appear here.
+      </div>
     </section>
 
-    <footer class="footer" role="contentinfo">
+    <footer class="footer">
       <div class="footer-inner">
         <span>© <span id="year-now"></span> Birkneh T. Tadesse</span>
         <span class="muted"></span>
@@ -468,39 +447,5 @@
   </main>
 
   <script src="./script.js"></script>
-
-  <!-- Tiny, safe enhancements (won't break your existing script.js) -->
-  <script>
-    // Photo fallback
-    (function(){
-      const img = document.getElementById("profile-photo");
-      const fb  = document.getElementById("photo-fallback");
-      if(!img) return;
-      img.addEventListener("error", () => {
-        if(fb) fb.style.display = "";
-        img.style.display = "none";
-      });
-    })();
-
-    // Mobile nav toggle
-    (function(){
-      const btn = document.getElementById("btn-menu");
-      const nav = document.getElementById("site-nav");
-      if(!btn || !nav) return;
-
-      btn.addEventListener("click", () => {
-        const open = nav.classList.toggle("is-open");
-        btn.setAttribute("aria-expanded", String(open));
-      });
-
-      // Close menu after clicking a link (mobile)
-      nav.querySelectorAll("a").forEach(a => {
-        a.addEventListener("click", () => {
-          nav.classList.remove("is-open");
-          btn.setAttribute("aria-expanded", "false");
-        });
-      });
-    })();
-  </script>
 </body>
 </html>
