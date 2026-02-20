@@ -1045,3 +1045,29 @@ body.dark .brand-mark{
 body.dark .brand-mark::after{
   color: rgba(255,255,255,.90) !important;
 }
+/* ===== Easy header spacing fix (paste at END of styles.css) ===== */
+
+/* 3 columns: Brand | Nav | Actions */
+.topbar-inner{
+  display: grid !important;
+  grid-template-columns: auto 1fr auto !important;
+  align-items: center !important;
+  column-gap: 34px !important;   /* <- main spacing */
+}
+
+/* Ensure brand never collides */
+.brand{
+  flex: none !important;
+}
+
+/* Give nav inner padding so first/last link never touches brand/actions */
+.nav{
+  justify-content: center !important;
+  padding: 0 28px !important;    /* <- adds air around ABOUT and BLOGS */
+  min-width: 0 !important;
+}
+
+/* Optional: a touch more separation between name and nav */
+.brand-text{
+  margin-right: 6px !important;
+}
