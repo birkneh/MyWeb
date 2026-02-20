@@ -933,3 +933,22 @@ body.dark .btn-primary:hover{ background: rgba(255,255,255,0.80); }
   }
   .hero-left{ transform: none; }
 }
+/* ===== Fix header brand overlap ===== */
+.brand{
+  gap: 12px;
+  align-items: center;
+}
+
+.brand-mark{
+  display: inline-grid;       /* make width/height apply */
+  place-items: center;
+  flex: 0 0 64px;             /* reserve space so text can't overlap */
+  width: 64px;
+  height: 64px;
+  margin: 0;                  /* avoid weird inline spacing */
+}
+
+.brand-text{
+  display: inline-block;
+  line-height: 1;
+}
