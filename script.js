@@ -1,9 +1,9 @@
-/* =========================================================
-   CONFIG
+/*=========================================================
+   CONFIG (DISAMBIGUATED)
    ========================================================= */
 
 const PUBMED_AUTHOR_QUERY =
-  `(birkneh tilahun tadesse[Author] OR birkneh tilahun[Author] OR tadesse bt[Author])`;
+  `(birkneh tilahun tadesse[Author] OR birkneh tilahun[Author] or tadesse bt[Author])`;
 
 const EXCLUDE_TITLE_ABSTRACT = [
   `"food safety"[Title/Abstract]`,
@@ -14,80 +14,11 @@ const PUBMED_MAX = 250;
 const LOCAL_PUBLICATIONS_JSON = "./publications.json";
 const AUTO_FETCH_PUBMED_ON_LOAD = true;
 
-// NCBI eUtils best-practice params (helps reliability)
-const NCBI_TOOL = "birkneh-cv-site";
-const NCBI_EMAIL = "birknehtilahun@gmail.com";
-
-// Fetch guard
-const FETCH_TIMEOUT_MS = 15000;
-
-/* =========================================================
-   STORAGE KEYS
-   ========================================================= */
-
-const PUB_REVIEW_STORAGE_KEY = "pub_review_v1";
-const BLOG_ADMIN_SESSION_KEY = "blog_admin_session_v1";
-const BLOG_DRAFTS_STORAGE_KEY = "blog_posts_local_v1";
-
-/* =========================================================
-   BASIC UTIL
-   ========================================================= */
-
-function esc(s){
-  return String(s ?? "").replace(/[&<>"]/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"
-  }[c]));
-}
-
-function setStatus(msg){
-  const el = document.getElementById("pub-status");
-  if(el) el.textContent = msg;
-}
-
-function withTimeout(fetchPromise, ms = FETCH_TIMEOUT_MS){
-  const ctrl = new AbortController();
-  const t = setTimeout(()=> ctrl.abort(), ms);
-  return {
-    signal: ctrl.signal,
-    run: async () => {
-      try{
-        return await fetchPromise(ctrl.signal);
-      } finally {
-        clearTimeout(t);
-      }
-    }
-  };
-}
-
-function formatDateTime(iso){
-  try{
-    const d = new Date(iso);
-    return d.toLocaleString();
-  }catch(e){
-    return String(iso || "");
-  }
-}
-
-function safeId(){
-  return `id_${Math.random().toString(16).slice(2)}_${Date.now().toString(16)}`;
-}
-
-function jsonDownload(filename, obj){
-  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
 /* =========================================================
    PUBLICATION REVIEW (ACCEPT/REJECT)
    ========================================================= */
 
+const PUB_REVIEW_STORAGE_KEY = "pub_review_v1";
 let PUB_REVIEW = {}; // { key: "accepted" | "rejected" }
 
 function loadPubReview(){
@@ -98,9 +29,7 @@ function savePubReview(){
   localStorage.setItem(PUB_REVIEW_STORAGE_KEY, JSON.stringify(PUB_REVIEW));
 }
 function pubKey(p){
-  if(p.doi){
-    return `doi:${String(p.doi).toLowerCase().replace(/^https?:\/\/(dx\.)?doi\.org\//i,"").trim()}`;
-  }
+  if(p.doi) return `doi:${String(p.doi).toLowerCase().replace(/^https?:\/\/(dx\.)?doi\.org\//i,"").trim()}`;
   if(p.pmid) return `pmid:${String(p.pmid).trim()}`;
   return `t:${String(p.title||p.citation||"").toLowerCase().replace(/\s+/g," ").slice(0,160)}`;
 }
@@ -115,8 +44,19 @@ function setReviewState(p, state){
 }
 
 /* =========================================================
-   LINKS + FILTERS
+   UTIL
    ========================================================= */
+
+function esc(s){
+  return String(s ?? "").replace(/[&<>"]/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"
+  }[c]));
+}
+
+function setStatus(msg){
+  const el = document.getElementById("pub-status");
+  if(el) el.textContent = msg;
+}
 
 function scholarSearchLink(citationOrTitle){
   const q = encodeURIComponent(String(citationOrTitle || "").slice(0, 220));
@@ -169,7 +109,7 @@ function filterPublications(list, q){
 }
 
 /* =========================================================
-   RENDER PUBLICATIONS
+   RENDER
    ========================================================= */
 
 let PUBS = [];
@@ -190,7 +130,7 @@ function renderPublications(){
     if(reviewMode === "accepted") return st === "accepted";
     if(reviewMode === "rejected") return st === "rejected";
     if(reviewMode === "unreviewed") return st === "unreviewed";
-    return st !== "rejected"; // default: hide rejected
+    return st !== "rejected";
   });
 
   listEl.innerHTML = "";
@@ -357,13 +297,12 @@ function renderPublications(){
 }
 
 /* =========================================================
-   LOADING PUBLICATIONS
+   LOADING
    ========================================================= */
 
 async function loadLocalPublications(){
   try{
-    const url = `${LOCAL_PUBLICATIONS_JSON}?v=${Date.now()}`;
-    const res = await fetch(url, { cache: "no-store" });
+    const res = await fetch(LOCAL_PUBLICATIONS_JSON, { cache: "no-store" });
     if(!res.ok) throw new Error(`Local publications.json not found (${res.status})`);
     const data = await res.json();
     if(!Array.isArray(data)) throw new Error("publications.json must be an array");
@@ -381,34 +320,22 @@ function buildPubMedQuery(){
   return `${PUBMED_AUTHOR_QUERY}${exclPart}`.trim();
 }
 
-async function fetchJSON(url){
-  const runner = withTimeout(async (signal) => {
-    const res = await fetch(url, { cache: "no-store", signal });
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.json();
-  });
-  return await runner.run();
-}
-
 async function fetchPubMed(){
   const base = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils";
   const term = encodeURIComponent(buildPubMedQuery());
-  const common = `&tool=${encodeURIComponent(NCBI_TOOL)}&email=${encodeURIComponent(NCBI_EMAIL)}`;
 
-  // 1) ESearch
-  const esearchURL =
-    `${base}/esearch.fcgi?db=pubmed&retmode=json&retmax=${PUBMED_MAX}&sort=date&term=${term}${common}`;
-
-  const sJson = await fetchJSON(esearchURL);
+  const esearchURL = `${base}/esearch.fcgi?db=pubmed&retmode=json&retmax=${PUBMED_MAX}&sort=date&term=${term}`;
+  const sRes = await fetch(esearchURL, { cache: "no-store" });
+  if(!sRes.ok) throw new Error(`PubMed esearch failed: ${sRes.status}`);
+  const sJson = await sRes.json();
   const ids = (sJson?.esearchresult?.idlist || []).slice(0, PUBMED_MAX);
   if(ids.length === 0) return [];
 
-  // 2) ESummary (GET with comma-separated IDs)
   const idStr = ids.join(",");
-  const esummaryURL =
-    `${base}/esummary.fcgi?db=pubmed&retmode=json&id=${encodeURIComponent(idStr)}${common}`;
-
-  const sumJson = await fetchJSON(esummaryURL);
+  const esummaryURL = `${base}/esummary.fcgi?db=pubmed&retmode=json&id=${idStr}`;
+  const sumRes = await fetch(esummaryURL, { cache: "no-store" });
+  if(!sumRes.ok) throw new Error(`PubMed esummary failed: ${sumRes.status}`);
+  const sumJson = await sumRes.json();
 
   const result = sumJson?.result || {};
   const uids = result?.uids || [];
@@ -453,10 +380,9 @@ function dedupePubs(pubs){
   const seen = new Set();
   const out = [];
   for(const p of pubs){
-    const key =
-      p.doi ? `doi:${String(p.doi).toLowerCase().replace(/^https?:\/\/(dx\.)?doi\.org\//i,"").trim()}` :
-      p.pmid ? `pmid:${String(p.pmid).trim()}` :
-      `t:${String(p.title||p.citation||"").toLowerCase().slice(0,160)}`;
+    const key = (p.doi ? `doi:${String(p.doi).toLowerCase()}` :
+                p.pmid ? `pmid:${String(p.pmid)}` :
+                `t:${String(p.title||p.citation||"").toLowerCase().slice(0,160)}`);
     if(seen.has(key)) continue;
     seen.add(key);
     out.push(p);
@@ -467,12 +393,12 @@ function dedupePubs(pubs){
 function mergePreferLocal(online, local){
   const byKey = new Map();
   function keyOf(p){
-    if(p.doi) return `doi:${String(p.doi).toLowerCase().replace(/^https?:\/\/(dx\.)?doi\.org\//i,"").trim()}`;
-    if(p.pmid) return `pmid:${String(p.pmid).trim()}`;
+    if(p.doi) return `doi:${String(p.doi).toLowerCase()}`;
+    if(p.pmid) return `pmid:${String(p.pmid)}`;
     return `t:${String(p.title||p.citation||"").toLowerCase().slice(0,160)}`;
   }
 
-  for(const p of online) byKey.set(keyOf(p), { ...p });
+  for(const p of online) byKey.set(keyOf(p), {...p});
 
   for(const lp of local){
     const k = keyOf(lp);
@@ -482,13 +408,13 @@ function mergePreferLocal(online, local){
       if(lp.url) merged.url = lp.url;
       byKey.set(k, merged);
     }else{
-      byKey.set(k, { ...lp });
+      byKey.set(k, {...lp});
     }
   }
   return Array.from(byKey.values());
 }
 
-async function loadPublications({preferPubMed=true} = {}){
+async function loadPublications({preferPubMed=true}={}){
   setStatus("Loading publications…");
   const local = await loadLocalPublications();
 
@@ -498,16 +424,12 @@ async function loadPublications({preferPubMed=true} = {}){
       const online = await fetchPubMed();
       const merged = mergePreferLocal(online, local);
       const final = dedupePubs(merged);
-      setStatus(`Loaded ${final.length} publications (PubMed + local).`);
+      setStatus(`Loaded ${final.length} publications (PubMed + local fallback).`);
       return final;
     }catch(e){
       console.warn("PubMed fetch failed:", e);
       const final = dedupePubs(local);
-      const msg =
-        (e?.name === "AbortError")
-          ? `PubMed timed out; loaded ${final.length} from local file.`
-          : `PubMed fetch failed; loaded ${final.length} from local file.`;
-      setStatus(msg);
+      setStatus(`PubMed fetch failed; loaded ${final.length} publications from local file.`);
       return final;
     }
   }
@@ -544,7 +466,7 @@ function initPhoto(){
     fallback.style.display = "flex";
   });
 
-  if(img.getAttribute("src") && img.getAttribute("src").trim()){
+  if(img.src && img.src.trim()){
     img.style.display = "block";
     fallback.style.display = "none";
   } else {
@@ -554,7 +476,7 @@ function initPhoto(){
 }
 
 /* =========================================================
-   FEATURED LINKEDIN
+   FEATURED LINKEDIN INTERACTION
    ========================================================= */
 
 function initFeaturedLinkedIn(){
@@ -578,18 +500,6 @@ function initFeaturedLinkedIn(){
     });
   }
 
-  if(card){
-    card.style.cursor = "pointer";
-    card.addEventListener("click", (e)=>{
-      const t = e.target;
-      const isInteractive =
-        t?.closest?.("a") || t?.closest?.("button") || t?.closest?.("input") || t?.closest?.("select");
-      if(isInteractive) return;
-      const url = card.getAttribute("data-url") || "";
-      if(url) window.open(url, "_blank", "noreferrer");
-    });
-  }
-
   if(copyBtn && card){
     copyBtn.addEventListener("click", async ()=>{
       const url = card.getAttribute("data-url") || "";
@@ -606,379 +516,9 @@ function initFeaturedLinkedIn(){
 
   if(jumpBtn){
     jumpBtn.addEventListener("click", ()=>{
-      const target = document.getElementById("li-card") || document.querySelector(".featured");
-      if(target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
-}
-
-/* =========================================================
-   BLOGS (public + admin)
-   ========================================================= */
-
-let BLOGS_PUBLIC = []; // from blogs.json (published)
-let BLOGS_LOCAL = [];  // localStorage (drafts + published)
-
-function loadLocalBlogs(){
-  try{
-    BLOGS_LOCAL = JSON.parse(localStorage.getItem(BLOG_DRAFTS_STORAGE_KEY) || "[]") || [];
-    if(!Array.isArray(BLOGS_LOCAL)) BLOGS_LOCAL = [];
-  }catch(e){
-    BLOGS_LOCAL = [];
-  }
-}
-
-function saveLocalBlogs(){
-  localStorage.setItem(BLOG_DRAFTS_STORAGE_KEY, JSON.stringify(BLOGS_LOCAL));
-}
-
-async function loadPublicBlogs(){
-  try{
-    const res = await fetch(`./blogs.json?v=${Date.now()}`, { cache: "no-store" });
-    if(!res.ok) return [];
-    const data = await res.json();
-    if(!Array.isArray(data)) return [];
-    return data.filter(x => x && x.status === "published");
-  }catch(e){
-    return [];
-  }
-}
-
-function getAdminEnabled(){
-  const url = new URL(window.location.href);
-  const hasParam = url.searchParams.get("admin") === "1";
-  const hasSession = localStorage.getItem(BLOG_ADMIN_SESSION_KEY) === "1";
-  return hasParam || hasSession;
-}
-
-function ensureAdminSession(){
-  // If user opened ?admin=1, keep session in this browser
-  const url = new URL(window.location.href);
-  if(url.searchParams.get("admin") === "1"){
-    localStorage.setItem(BLOG_ADMIN_SESSION_KEY, "1");
-  }
-}
-
-function logoutAdmin(){
-  localStorage.removeItem(BLOG_ADMIN_SESSION_KEY);
-}
-
-function combinedBlogsForDisplay(){
-  // show published from repo + (if admin) drafts/published from local
-  const isAdmin = getAdminEnabled();
-
-  const publishedRepo = (BLOGS_PUBLIC || []).map(b => ({...b, source: "repo"}));
-
-  const local = (BLOGS_LOCAL || []).map(b => ({...b, source: "local"}));
-
-  let all = publishedRepo;
-
-  if(isAdmin){
-    // show drafts too (local only)
-    all = [...publishedRepo, ...local];
-  } else {
-    // only local published if someone saved locally (optional)
-    all = [...publishedRepo, ...local.filter(b => b.status === "published")];
-  }
-
-  // dedupe by id if same
-  const byId = new Map();
-  for(const b of all){
-    if(!b || !b.id) continue;
-    byId.set(b.id, b);
-  }
-  const out = Array.from(byId.values());
-
-  // sort newest first
-  out.sort((a,b)=> new Date(b.updatedAt || b.createdAt || 0) - new Date(a.updatedAt || a.createdAt || 0));
-  return out;
-}
-
-function blogCardHTML(b){
-  const when = formatDateTime(b.publishedAt || b.updatedAt || b.createdAt);
-  const author = b.author || "—";
-  const status = b.status || "draft";
-
-  const excerpt = String(b.content || "").trim().slice(0, 260);
-  const showTag = (status === "draft") ? `<span class="pill">Draft</span>` : `<span class="pill">Published</span>`;
-
-  return `
-    <div class="blog-card">
-      <div style="display:flex; justify-content:space-between; gap:10px; align-items:flex-start;">
-        <div>
-          <div class="blog-title">${esc(b.title || "Untitled")}</div>
-          <div class="blog-meta muted">By <b>${esc(author)}</b> • ${esc(when)}</div>
-        </div>
-        ${showTag}
-      </div>
-      <div class="muted" style="margin-top:10px; line-height:1.55;">
-        ${esc(excerpt)}${(String(b.content||"").length > excerpt.length) ? "…" : ""}
-      </div>
-      <div class="blog-actions">
-        <button class="btn btn-primary btn-sm" type="button" data-blog-open="${esc(b.id)}">
-          <i class="fa-solid fa-book-open"></i> Read
-        </button>
-      </div>
-    </div>
-  `;
-}
-
-function renderBlogs(){
-  const heroTarget = document.getElementById("blog-posts");
-  const sectionTarget = document.getElementById("blogs-section");
-  const all = combinedBlogsForDisplay();
-
-  // show latest 2 in hero (if any)
-  if(heroTarget){
-    const latest = all.filter(b => (getAdminEnabled() ? true : b.status === "published")).slice(0, 2);
-    heroTarget.innerHTML = latest.length
-      ? latest.map(blogCardHTML).join("")
-      : `<div class="muted">No blog posts yet.</div>`;
-  }
-
-  if(sectionTarget){
-    const visible = all.filter(b => (getAdminEnabled() ? true : b.status === "published"));
-    sectionTarget.innerHTML = visible.length
-      ? visible.map(blogCardHTML).join("")
-      : `<div class="muted">No blog posts yet.</div>`;
-  }
-
-  // wire "Read"
-  const wire = (root) => {
-    root?.querySelectorAll?.("[data-blog-open]")?.forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        const id = btn.getAttribute("data-blog-open");
-        const b = combinedBlogsForDisplay().find(x => x.id === id);
-        if(!b) return;
-        openBlogReader(b);
-      });
-    });
-  };
-  wire(heroTarget);
-  wire(sectionTarget);
-}
-
-function openBlogReader(b){
-  // simple reader modal using native alert-like overlay
-  const wrap = document.createElement("div");
-  wrap.className = "modal";
-  wrap.innerHTML = `
-    <div class="modal-backdrop"></div>
-    <div class="modal-card" role="dialog" aria-modal="true" style="max-width: 880px;">
-      <div class="modal-head">
-        <h2 style="margin:0;">${esc(b.title || "Untitled")}</h2>
-        <div class="modal-head-actions">
-          <button class="btn btn-ghost btn-sm" type="button" data-close="1">
-            <i class="fa-solid fa-xmark"></i> Close
-          </button>
-        </div>
-      </div>
-      <div class="modal-body">
-        <div class="muted" style="margin-bottom:12px;">
-          By <b>${esc(b.author || "—")}</b> • ${esc(formatDateTime(b.publishedAt || b.updatedAt || b.createdAt))}
-          ${b.status === "draft" ? " • Draft" : ""}
-        </div>
-        <div style="white-space: pre-wrap; line-height:1.7;">${esc(b.content || "")}</div>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(wrap);
-
-  const close = ()=> wrap.remove();
-  wrap.querySelector("[data-close]")?.addEventListener("click", close);
-  wrap.querySelector(".modal-backdrop")?.addEventListener("click", close);
-  document.addEventListener("keydown", function escClose(e){
-    if(e.key === "Escape"){ close(); document.removeEventListener("keydown", escClose); }
-  });
-}
-
-/* --- Admin UI wiring --- */
-
-function initAdmin(){
-  const adminBtn = document.getElementById("btn-admin");
-  const modal = document.getElementById("admin-modal");
-  if(!adminBtn || !modal) return;
-
-  ensureAdminSession();
-
-  const enabled = getAdminEnabled();
-  if(enabled){
-    adminBtn.hidden = false;
-  }
-
-  const closeModal = ()=> modal.setAttribute("hidden", "");
-  const openModal  = ()=> modal.removeAttribute("hidden");
-
-  // open/close
-  adminBtn.addEventListener("click", ()=>{
-    openModal();
-    renderAdminList();
-  });
-
-  modal.querySelector("[data-close]")?.addEventListener("click", closeModal);
-  modal.querySelector("#btn-admin-close")?.addEventListener("click", closeModal);
-  modal.querySelector(".modal-backdrop")?.addEventListener("click", closeModal);
-
-  modal.querySelector("#btn-admin-logout")?.addEventListener("click", ()=>{
-    logoutAdmin();
-    adminBtn.hidden = true;
-    closeModal();
-    renderBlogs(); // hide drafts
-  });
-
-  // save
-  modal.querySelector("#btn-blog-save")?.addEventListener("click", ()=>{
-    const title = document.getElementById("blog-title")?.value?.trim() || "";
-    const author = document.getElementById("blog-author")?.value?.trim() || "Birkneh T. Tadesse";
-    const status = document.getElementById("blog-status")?.value || "draft";
-    const content = document.getElementById("blog-content")?.value || "";
-
-    const statusEl = document.getElementById("blog-admin-status");
-
-    if(!title){
-      if(statusEl) statusEl.textContent = "Title is required.";
-      return;
-    }
-    if(!String(content).trim()){
-      if(statusEl) statusEl.textContent = "Content is required.";
-      return;
-    }
-
-    const now = new Date().toISOString();
-    const post = {
-      id: safeId(),
-      title,
-      author,
-      status,
-      content,
-      createdAt: now,
-      updatedAt: now,
-      publishedAt: (status === "published") ? now : null
-    };
-
-    BLOGS_LOCAL.unshift(post);
-    saveLocalBlogs();
-
-    if(statusEl) statusEl.textContent = "Saved locally.";
-    setTimeout(()=>{ if(statusEl) statusEl.textContent = ""; }, 1200);
-
-    // clear editor
-    document.getElementById("blog-title").value = "";
-    document.getElementById("blog-content").value = "";
-    document.getElementById("blog-status").value = "draft";
-
-    renderAdminList();
-    renderBlogs();
-  });
-
-  // download
-  modal.querySelector("#btn-blog-download")?.addEventListener("click", ()=>{
-    // Only published posts should go into blogs.json for the website
-    const publishedLocal = (BLOGS_LOCAL || []).filter(p => p.status === "published");
-    jsonDownload("blogs.json", publishedLocal);
-  });
-}
-
-function renderAdminList(){
-  const box = document.getElementById("blog-admin-list");
-  if(!box) return;
-
-  const items = (BLOGS_LOCAL || []);
-  if(items.length === 0){
-    box.innerHTML = `<div class="muted">No local posts yet.</div>`;
-    return;
-  }
-
-  box.innerHTML = items.map(p=>{
-    return `
-      <div class="admin-row">
-        <div>
-          <div><b>${esc(p.title || "Untitled")}</b> ${p.status === "draft" ? `<span class="pill">Draft</span>` : `<span class="pill">Published</span>`}</div>
-          <div class="meta">By ${esc(p.author || "—")} • ${esc(formatDateTime(p.updatedAt || p.createdAt))}</div>
-        </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;">
-          <button class="btn btn-ghost btn-sm" type="button" data-admin-open="${esc(p.id)}">
-            <i class="fa-solid fa-pen"></i> Edit
-          </button>
-          <button class="btn btn-ghost btn-sm" type="button" data-admin-del="${esc(p.id)}">
-            <i class="fa-solid fa-trash"></i> Delete
-          </button>
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  box.querySelectorAll("[data-admin-del]").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const id = btn.getAttribute("data-admin-del");
-      const ok = confirm("Delete this post (local only)?");
-      if(!ok) return;
-      BLOGS_LOCAL = BLOGS_LOCAL.filter(p => p.id !== id);
-      saveLocalBlogs();
-      renderAdminList();
-      renderBlogs();
-    });
-  });
-
-  box.querySelectorAll("[data-admin-open]").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const id = btn.getAttribute("data-admin-open");
-      const p = BLOGS_LOCAL.find(x => x.id === id);
-      if(!p) return;
-
-      document.getElementById("blog-title").value = p.title || "";
-      document.getElementById("blog-author").value = p.author || "Birkneh T. Tadesse";
-      document.getElementById("blog-status").value = p.status || "draft";
-      document.getElementById("blog-content").value = p.content || "";
-
-      // overwrite save to "update" this post
-      const saveBtn = document.getElementById("btn-blog-save");
-      const statusEl = document.getElementById("blog-admin-status");
-      const originalHandler = saveBtn.__handler;
-
-      if(originalHandler){
-        saveBtn.removeEventListener("click", originalHandler);
-      }
-
-      const handler = ()=>{
-        const title = document.getElementById("blog-title")?.value?.trim() || "";
-        const author = document.getElementById("blog-author")?.value?.trim() || "Birkneh T. Tadesse";
-        const status = document.getElementById("blog-status")?.value || "draft";
-        const content = document.getElementById("blog-content")?.value || "";
-
-        if(!title){
-          if(statusEl) statusEl.textContent = "Title is required.";
-          return;
-        }
-        if(!String(content).trim()){
-          if(statusEl) statusEl.textContent = "Content is required.";
-          return;
-        }
-
-        const now = new Date().toISOString();
-        p.title = title;
-        p.author = author;
-        p.status = status;
-        p.content = content;
-        p.updatedAt = now;
-        if(status === "published" && !p.publishedAt) p.publishedAt = now;
-        if(status === "draft") p.publishedAt = p.publishedAt || null;
-
-        saveLocalBlogs();
-        if(statusEl) statusEl.textContent = "Updated locally.";
-        setTimeout(()=>{ if(statusEl) statusEl.textContent = ""; }, 1200);
-
-        renderAdminList();
-        renderBlogs();
-      };
-
-      saveBtn.__handler = handler;
-      saveBtn.addEventListener("click", handler);
-
-      if(statusEl) statusEl.textContent = "Loaded into editor (Save updates this post).";
-      setTimeout(()=>{ if(statusEl) statusEl.textContent = ""; }, 1600);
-    });
-  });
 }
 
 /* =========================================================
@@ -986,20 +526,13 @@ function renderAdminList(){
    ========================================================= */
 
 window.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("year-now")?.textContent = new Date().getFullYear();
-  document.getElementById("last-updated")?.textContent = new Date().toLocaleDateString();
+  document.getElementById("year-now").textContent = new Date().getFullYear();
+  document.getElementById("last-updated").textContent = new Date().toLocaleDateString();
 
   initTheme();
   initPhoto();
   initFeaturedLinkedIn();
 
-  // Blogs
-  loadLocalBlogs();
-  BLOGS_PUBLIC = await loadPublicBlogs();
-  initAdmin();
-  renderBlogs();
-
-  // Publications
   loadPubReview();
 
   PUBS = await loadPublications({ preferPubMed: AUTO_FETCH_PUBMED_ON_LOAD });
@@ -1012,7 +545,7 @@ window.addEventListener("DOMContentLoaded", async ()=>{
   document.getElementById("btn-refresh")?.addEventListener("click", async ()=>{
     setStatus("Refreshing from PubMed…");
     PUBS = await loadPublications({ preferPubMed: true });
-    document.getElementById("last-updated")?.textContent = new Date().toLocaleString();
+    document.getElementById("last-updated").textContent = new Date().toLocaleString();
     renderPublications();
   });
 
@@ -1023,4 +556,404 @@ window.addEventListener("DOMContentLoaded", async ()=>{
     savePubReview();
     renderPublications();
   });
+});
+/* =========================================================
+   BLOGS + ADMIN (GitHub Pages-friendly)
+   ========================================================= */
+
+const BLOGS_REMOTE_JSON = "./blogs.json";        // optional public file (commit this)
+const BLOGS_LOCAL_KEY = "blogs_local_v1";        // your private browser storage
+const ADMIN_HASH_KEY = "admin_hash_v1";
+const ADMIN_OK_KEY = "admin_ok_v1";
+
+let BLOGS_REMOTE = [];
+let BLOGS_LOCAL = [];
+
+function blogEsc(s){
+  return String(s ?? "").replace(/[&<>"]/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"
+  }[c]));
+}
+
+function blogSetAdminStatus(msg){
+  const el = document.getElementById("blog-admin-status");
+  if(el) el.textContent = msg;
+}
+
+function blogNowISO(){ return new Date().toISOString(); }
+
+function blogSlugify(title){
+  return String(title || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80) || "post";
+}
+
+function blogLoadLocal(){
+  try{
+    BLOGS_LOCAL = JSON.parse(localStorage.getItem(BLOGS_LOCAL_KEY) || "[]") || [];
+    if(!Array.isArray(BLOGS_LOCAL)) BLOGS_LOCAL = [];
+  }catch(e){
+    BLOGS_LOCAL = [];
+  }
+}
+
+function blogSaveLocal(){
+  localStorage.setItem(BLOGS_LOCAL_KEY, JSON.stringify(BLOGS_LOCAL));
+}
+
+async function blogLoadRemote(){
+  try{
+    const r = await fetch(BLOGS_REMOTE_JSON, { cache: "no-store" });
+    if(!r.ok) throw new Error(String(r.status));
+    const data = await r.json();
+    BLOGS_REMOTE = Array.isArray(data) ? data : [];
+  }catch(e){
+    BLOGS_REMOTE = [];
+  }
+}
+
+function blogNormalize(p){
+  const postedAt = p.postedAt || p.createdAt || null;
+  return {
+    id: p.id || `${p.slug || blogSlugify(p.title)}-${(postedAt||"").slice(0,10) || "x"}`,
+    title: p.title || "Untitled",
+    slug: p.slug || blogSlugify(p.title),
+    author: p.author || "Birkneh T. Tadesse",
+    status: p.status || "published",           // published | draft
+    postedAt: postedAt || blogNowISO(),
+    content: p.content || "",
+    source: p.source || "remote"              // remote | local
+  };
+}
+
+function blogSortNewest(a,b){
+  return new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime();
+}
+
+function blogFormatDate(iso){
+  try{
+    return new Date(iso).toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
+  }catch(e){
+    return iso || "";
+  }
+}
+
+function renderBlogCards(){
+  const container = document.getElementById("blog-posts");
+  if(!container) return;
+
+  const isAdmin = localStorage.getItem(ADMIN_OK_KEY) === "1";
+
+  const remote = BLOGS_REMOTE.map(b => blogNormalize({ ...b, source:"remote" }));
+  const local = BLOGS_LOCAL.map(b => blogNormalize({ ...b, source:"local" }));
+
+  // Only show published to public visitors; admin sees drafts too
+  const combined = [...remote, ...local]
+    .filter(p => isAdmin ? true : p.status === "published")
+    .sort(blogSortNewest);
+
+  container.innerHTML = "";
+
+  if(combined.length === 0){
+    container.innerHTML = `<div class="muted">No blog posts yet.</div>`;
+    return;
+  }
+
+  for(const post of combined){
+    const card = document.createElement("div");
+    card.className = "blog-card";
+
+    const metaLine = `Posted ${blogEsc(blogFormatDate(post.postedAt))} • by ${blogEsc(post.author)}`
+      + (post.source === "local" ? ` • <b>LOCAL</b>` : "");
+
+    const excerpt = post.content.trim().slice(0, 220);
+
+    card.innerHTML = `
+      <div class="blog-title">${blogEsc(post.title)}</div>
+      <div class="blog-meta muted">${metaLine}</div>
+      <div class="muted" style="margin-top:10px; line-height:1.6;">
+        ${blogEsc(excerpt)}${post.content.length > 220 ? "…" : ""}
+      </div>
+      <div class="blog-actions">
+        <button class="btn btn-ghost btn-sm" type="button" data-read="${blogEsc(post.id)}">
+          <i class="fa-solid fa-book-open"></i> Read
+        </button>
+      </div>
+      <div class="muted" data-full="${blogEsc(post.id)}" hidden style="margin-top:12px; white-space:pre-wrap; line-height:1.7;">
+        ${blogEsc(post.content)}
+      </div>
+    `;
+    container.appendChild(card);
+  }
+
+  // Read toggles
+  container.querySelectorAll("[data-read]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.getAttribute("data-read");
+      const full = container.querySelector(`[data-full="${CSS.escape(id)}"]`);
+      if(!full) return;
+      const hidden = full.hasAttribute("hidden");
+      if(hidden) full.removeAttribute("hidden");
+      else full.setAttribute("hidden", "");
+    });
+  });
+}
+
+/* ---------- Admin auth (local only) ---------- */
+
+function bufToHex(buffer){
+  return [...new Uint8Array(buffer)].map(b => b.toString(16).padStart(2,"0")).join("");
+}
+async function sha256(str){
+  const enc = new TextEncoder().encode(str);
+  const buf = await crypto.subtle.digest("SHA-256", enc);
+  return bufToHex(buf);
+}
+
+async function ensureAdminLogin(){
+  const existingHash = localStorage.getItem(ADMIN_HASH_KEY);
+
+  if(!existingHash){
+    const p1 = prompt("Set an admin passphrase (store only on this device):");
+    if(!p1) return false;
+    const p2 = prompt("Confirm passphrase:");
+    if(!p2 || p2 !== p1){
+      alert("Passphrases did not match.");
+      return false;
+    }
+    const h = await sha256(p1);
+    localStorage.setItem(ADMIN_HASH_KEY, h);
+    localStorage.setItem(ADMIN_OK_KEY, "1");
+    return true;
+  }else{
+    const p = prompt("Admin passphrase:");
+    if(!p) return false;
+    const h = await sha256(p);
+    if(h !== existingHash){
+      alert("Incorrect passphrase.");
+      return false;
+    }
+    localStorage.setItem(ADMIN_OK_KEY, "1");
+    return true;
+  }
+}
+
+function adminLogout(){
+  localStorage.removeItem(ADMIN_OK_KEY);
+}
+
+/* ---------- Admin UI ---------- */
+
+function openAdminModal(){
+  const modal = document.getElementById("admin-modal");
+  if(!modal) return;
+  modal.removeAttribute("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closeAdminModal(){
+  const modal = document.getElementById("admin-modal");
+  if(!modal) return;
+  modal.setAttribute("hidden", "");
+  document.body.style.overflow = "";
+}
+
+function renderAdminList(){
+  const list = document.getElementById("blog-admin-list");
+  if(!list) return;
+
+  const rows = BLOGS_LOCAL
+    .map(blogNormalize)
+    .sort(blogSortNewest);
+
+  list.innerHTML = "";
+
+  if(rows.length === 0){
+    list.innerHTML = `<div class="muted">No local posts yet.</div>`;
+    return;
+  }
+
+  for(const p of rows){
+    const row = document.createElement("div");
+    row.className = "admin-row";
+    row.innerHTML = `
+      <div>
+        <div><b>${blogEsc(p.title)}</b> ${p.status === "draft" ? `<span class="pill" style="margin-left:8px;">Draft</span>` : ``}</div>
+        <div class="meta">Posted ${blogEsc(blogFormatDate(p.postedAt))} • by ${blogEsc(p.author)}</div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="btn btn-ghost btn-sm" type="button" data-edit="${blogEsc(p.id)}">
+          <i class="fa-solid fa-pen"></i> Edit
+        </button>
+        <button class="btn btn-ghost btn-sm" type="button" data-del="${blogEsc(p.id)}">
+          <i class="fa-solid fa-trash"></i> Delete
+        </button>
+      </div>
+    `;
+    list.appendChild(row);
+  }
+
+  list.querySelectorAll("[data-edit]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.getAttribute("data-edit");
+      const p = BLOGS_LOCAL.map(blogNormalize).find(x => x.id === id);
+      if(!p) return;
+      document.getElementById("blog-title").value = p.title;
+      document.getElementById("blog-author").value = p.author;
+      document.getElementById("blog-status").value = p.status;
+      document.getElementById("blog-content").value = p.content;
+      document.getElementById("blog-title").setAttribute("data-editing-id", p.id);
+      blogSetAdminStatus("Editing existing post.");
+    });
+  });
+
+  list.querySelectorAll("[data-del]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.getAttribute("data-del");
+      const ok = confirm("Delete this local post?");
+      if(!ok) return;
+      BLOGS_LOCAL = BLOGS_LOCAL.map(blogNormalize).filter(x => x.id !== id);
+      blogSaveLocal();
+      renderAdminList();
+      renderBlogCards();
+      blogSetAdminStatus("Deleted.");
+    });
+  });
+}
+
+function downloadBlogsJson(){
+  // Combine remote + local, but only published for public file
+  const remote = BLOGS_REMOTE.map(b => blogNormalize({ ...b, source:"remote" }));
+  const localPublished = BLOGS_LOCAL.map(b => blogNormalize({ ...b, source:"local" }))
+    .filter(p => p.status === "published");
+
+  // Prefer local if same slug/date id
+  const byId = new Map();
+  for(const p of remote) byId.set(p.id, p);
+  for(const p of localPublished) byId.set(p.id, p);
+
+  const out = Array.from(byId.values())
+    .map(p => ({
+      title: p.title,
+      slug: p.slug,
+      author: p.author,
+      status: "published",
+      postedAt: p.postedAt,
+      content: p.content
+    }))
+    .sort(blogSortNewest);
+
+  const blob = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "blogs.json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
+function initBlogAdmin(){
+  const adminBtn = document.getElementById("btn-admin");
+  if(!adminBtn) return;
+
+  const params = new URLSearchParams(location.search);
+  const canSeeAdmin = params.has("admin") || localStorage.getItem(ADMIN_OK_KEY) === "1";
+  adminBtn.hidden = !canSeeAdmin;
+
+  adminBtn.addEventListener("click", async ()=>{
+    const ok = localStorage.getItem(ADMIN_OK_KEY) === "1" ? true : await ensureAdminLogin();
+    if(!ok) return;
+
+    adminBtn.hidden = false;
+    blogSetAdminStatus("");
+    renderAdminList();
+    openAdminModal();
+  });
+
+  document.getElementById("btn-admin-close")?.addEventListener("click", closeAdminModal);
+  document.querySelector("#admin-modal [data-close]")?.addEventListener("click", closeAdminModal);
+
+  document.getElementById("btn-admin-logout")?.addEventListener("click", ()=>{
+    adminLogout();
+    closeAdminModal();
+    // keep button only if ?admin=1 is present
+    const params = new URLSearchParams(location.search);
+    adminBtn.hidden = !params.has("admin");
+  });
+
+  document.getElementById("btn-blog-download")?.addEventListener("click", ()=>{
+    downloadBlogsJson();
+    blogSetAdminStatus("Downloaded blogs.json — commit it to your repo to publish.");
+  });
+
+  document.getElementById("btn-blog-save")?.addEventListener("click", ()=>{
+    const titleEl = document.getElementById("blog-title");
+    const author = document.getElementById("blog-author")?.value || "Birkneh T. Tadesse";
+    const status = document.getElementById("blog-status")?.value || "draft";
+    const content = document.getElementById("blog-content")?.value || "";
+    const title = titleEl?.value || "";
+
+    if(!title.trim()){
+      blogSetAdminStatus("Title is required.");
+      return;
+    }
+    if(!content.trim()){
+      blogSetAdminStatus("Content is required.");
+      return;
+    }
+
+    const editingId = titleEl.getAttribute("data-editing-id") || "";
+    const postedAt = blogNowISO();
+    const slug = blogSlugify(title);
+
+    if(editingId){
+      BLOGS_LOCAL = BLOGS_LOCAL.map(blogNormalize).map(p=>{
+        if(p.id !== editingId) return p;
+        return {
+          ...p,
+          title,
+          slug,
+          author,
+          status,
+          content,
+          postedAt
+        };
+      });
+      titleEl.removeAttribute("data-editing-id");
+      blogSetAdminStatus(status === "published" ? "Updated (published locally). Download blogs.json to publish publicly." : "Updated draft.");
+    }else{
+      BLOGS_LOCAL.unshift({
+        id: `${slug}-${postedAt.slice(0,10)}`,
+        title,
+        slug,
+        author,
+        status,
+        postedAt,
+        content
+      });
+      blogSetAdminStatus(status === "published" ? "Saved (published locally). Download blogs.json to publish publicly." : "Saved draft.");
+    }
+
+    blogSaveLocal();
+    renderAdminList();
+    renderBlogCards();
+
+    // clear editor
+    document.getElementById("blog-title").value = "";
+    document.getElementById("blog-content").value = "";
+  });
+}
+
+/* ---------- Boot blogs ---------- */
+window.addEventListener("DOMContentLoaded", async ()=>{
+  blogLoadLocal();
+  await blogLoadRemote();
+  renderBlogCards();
+  initBlogAdmin();
 });
