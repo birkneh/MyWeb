@@ -848,3 +848,66 @@ body.dark .admin-row{ background: rgba(255,255,255,0.05); }
     padding: 40px 30px !important;
   }
 }
+/* =========================================================
+   HERO HARD OVERRIDE — forces the white card NOT to stretch
+   Paste at VERY END of styles.css
+   ========================================================= */
+
+body .page .hero .hero-inner{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+
+  display: grid !important;
+  grid-template-columns: 420px 1fr !important;
+  align-items: center !important;
+  gap: 0 !important;
+}
+
+body .page .hero .hero-right{
+  grid-column: 1 !important;
+  align-self: stretch !important;
+}
+
+body .page .hero .photo{
+  width: 100% !important;
+  height: 520px !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+body .page .hero .hero-left{
+  grid-column: 2 !important;
+
+  /* CRITICAL: stop grid stretching */
+  justify-self: start !important;
+  width: min(720px, 100%) !important;
+  max-width: 720px !important;
+
+  background: #fff !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: 0 24px 80px rgba(0,0,0,.12) !important;
+
+  padding: 60px 70px !important;
+  margin-left: -120px !important;
+  z-index: 2 !important;
+}
+
+@media (max-width: 1000px){
+  body .page .hero .hero-inner{
+    grid-template-columns: 1fr !important;
+  }
+  body .page .hero .photo{
+    height: 380px !important;
+  }
+  body .page .hero .hero-left{
+    margin-left: 0 !important;
+    margin-top: -40px !important;
+    padding: 40px 30px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
