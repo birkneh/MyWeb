@@ -889,3 +889,47 @@ body.dark .btn-primary:hover{ background: rgba(255,255,255,0.80); }
     padding: 30px 24px;
   }
 }
+/* ================================
+   FIXES: header logo + hero alignment
+   Paste at VERY END of styles.css
+   ================================ */
+
+/* 1) Make the brand mark actually a square (span is inline by default) */
+.brand-mark{
+  display: inline-grid;     /* <- critical */
+  place-items: center;
+}
+
+/* 2) Keep photo + hero card on the SAME ROW using grid areas */
+.hero-inner{
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
+  grid-template-areas: "photo card";
+  gap: 42px;
+  align-items: center;
+}
+
+/* Map your existing HTML blocks into the grid areas */
+.hero-right{
+  grid-area: photo;
+  align-self: center;
+}
+.hero-left{
+  grid-area: card;
+  align-self: center;
+
+  /* keep the overlap effect (tune if needed) */
+  transform: translateX(-90px);
+}
+
+/* Mobile: stack naturally + remove overlap */
+@media (max-width: 900px){
+  .hero-inner{
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "photo"
+      "card";
+    gap: 18px;
+  }
+  .hero-left{ transform: none; }
+}
