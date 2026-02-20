@@ -952,3 +952,24 @@ body.dark .btn-primary:hover{ background: rgba(255,255,255,0.80); }
   display: inline-block;
   line-height: 1;
 }
+/* ===== Fix header BT overlap (paste at END of styles.css) ===== */
+.brand{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-mark{
+  display: grid;          /* critical: makes width/height apply */
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;         /* reserve space so text can't sit on top */
+  line-height: 1;
+}
+
+.brand-text{
+  display: block;
+  line-height: 1;
+  white-space: nowrap;
+}
