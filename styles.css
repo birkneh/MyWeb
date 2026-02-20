@@ -1071,3 +1071,145 @@ body.dark .brand-mark::after{
 .brand-text{
   margin-right: 6px !important;
 }
+/* =========================================================
+   "Jeff Sachs"-style white hero box + square cards
+   Paste at END of styles.css
+   ========================================================= */
+
+/* ---- HERO LAYOUT: photo left, white card overlaps ---- */
+.hero-inner{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+
+  display: grid !important;
+  grid-template-columns: minmax(260px, 420px) 1fr !important;
+  align-items: stretch !important;
+  gap: 0 !important;
+}
+
+/* Big photo block (square, clean) */
+.hero-right{
+  grid-column: 1 !important;
+  align-self: stretch !important;
+}
+.photo{
+  width: 100% !important;
+  height: clamp(360px, 55vh, 560px) !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+.photo img{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+/* White overlay card */
+.hero-left{
+  grid-column: 2 !important;
+  align-self: center !important;
+
+  background: #ffffff !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: 0 22px 70px rgba(0,0,0,.12) !important;
+
+  padding: clamp(34px, 4.5vw, 72px) !important;
+  max-width: 720px !important;
+
+  /* overlap onto the photo like the reference */
+  margin-left: clamp(-140px, -10vw, -90px) !important;
+  z-index: 2 !important;
+}
+
+/* Typography inside the white box */
+.kicker{
+  display: none !important; /* matches the clean reference */
+}
+
+.hero-title{
+  font-family: "EB Garamond", Georgia, serif !important;
+  font-weight: 400 !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.02 !important;
+  font-size: clamp(46px, 6vw, 86px) !important;
+  margin: 0 0 18px !important;
+}
+
+.hero-sub{
+  font-family: inherit !important;
+  font-weight: 400 !important;
+  font-size: 0.45em !important;
+  color: rgba(17,17,17,.55) !important;
+  margin-left: 10px !important;
+}
+
+.hero-lede{
+  font-size: clamp(18px, 1.6vw, 24px) !important;
+  line-height: 1.6 !important;
+  color: rgba(17,17,17,.65) !important;
+  font-weight: 500 !important;
+  margin: 0 !important;
+  max-width: 44ch !important;
+}
+
+/* Chips look less “pill UI”, more minimal */
+.hero-actions{
+  margin-top: 18px !important;
+}
+.chip{
+  border-radius: 999px !important;
+  background: rgba(0,0,0,0.02) !important;
+}
+
+/* Meta boxes: keep, but make them subtle */
+.hero-meta .meta{
+  border-radius: 0 !important;
+  border: 1px solid rgba(0,0,0,.08) !important;
+  background: transparent !important;
+}
+
+/* ---- OPTIONAL: make ALL your main cards look like the same square white box ---- */
+/* If you ONLY want the hero to change, delete this block. */
+.card{
+  border-radius: 0 !important;
+  border: 0 !important;
+  background: #ffffff !important;
+  box-shadow: 0 18px 55px rgba(0,0,0,.08) !important;
+  padding: 22px !important;
+}
+
+/* Keep mini boxes slightly softer (optional) */
+.fact, .t-item, .edu-row, .mini, .lang, .post-card, .blog-card, .pub{
+  border-radius: 14px !important;
+}
+
+/* Mobile: stack photo above, remove overlap */
+@media (max-width: 900px){
+  .hero-inner{
+    grid-template-columns: 1fr !important;
+  }
+  .hero-right{ grid-column: 1 !important; }
+  .hero-left{
+    grid-column: 1 !important;
+    margin-left: 0 !important;
+    margin-top: -22px !important; /* small overlap still looks nice on mobile */
+  }
+}
+
+/* Dark mode: keep your existing dark palette; don't force white */
+body.dark .hero-left,
+body.dark .card{
+  background: rgba(255,255,255,0.06) !important;
+}
+body.dark .hero-lede{
+  color: rgba(255,255,255,.68) !important;
+}
+body.dark .hero-sub{
+  color: rgba(255,255,255,.60) !important;
+}
