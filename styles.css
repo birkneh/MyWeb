@@ -953,3 +953,76 @@ body .page .hero .hero-lede{
     padding: 34px 24px !important;
   }
 }
+/* =========================================================
+   FINAL FORCE: smaller Sachs-like hero card
+   (PASTE AS THE VERY LAST LINES IN styles.css)
+   ========================================================= */
+
+html body main.page section.hero .hero-inner{
+  display: grid !important;
+  grid-template-columns: 340px minmax(0,1fr) !important;
+  gap: 0 !important;
+  align-items: stretch !important;
+}
+
+html body main.page section.hero .hero-right{
+  grid-column: 1 !important;
+  align-self: stretch !important;
+}
+
+html body main.page section.hero .photo{
+  width: 100% !important;
+  height: 520px !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+html body main.page section.hero .photo img{
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+html body main.page section.hero .hero-left{
+  grid-column: 2 !important;
+
+  /* make the white box smaller */
+  width: 600px !important;
+  max-width: 600px !important;
+
+  padding: 44px 50px !important;
+
+  /* overlap */
+  margin-left: -130px !important;
+
+  background: #fff !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: 0 22px 70px rgba(0,0,0,.12) !important;
+  z-index: 2 !important;
+}
+
+html body main.page section.hero .hero-title{
+  font-size: clamp(44px, 5vw, 74px) !important;
+  line-height: 1.02 !important;
+}
+
+html body main.page section.hero .hero-lede{
+  font-size: clamp(17px, 1.5vw, 21px) !important;
+  max-width: 42ch !important;
+}
+
+@media (max-width: 900px){
+  html body main.page section.hero .hero-inner{
+    grid-template-columns: 1fr !important;
+  }
+  html body main.page section.hero .hero-left{
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-top: -26px !important;
+    padding: 30px 22px !important;
+  }
+}
