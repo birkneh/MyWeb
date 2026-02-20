@@ -11,23 +11,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  
-    <link rel="stylesheet" href="./styles.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
-  
-    <style>
-      section[id]{ scroll-margin-top: 96px; }
-    </style>
-  </head>
+
+  <link rel="stylesheet" href="./styles.css" />
+  <style>
+    section[id]{ scroll-margin-top: 110px; }
+  </style>
+</head>
 
 <body>
   <!-- Fixed top bar -->
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="#top" aria-label="Go to top">
-        <span class="brand-mark"></span>
+        <span class="brand-mark" aria-hidden="true"></span>
         <span class="brand-text">Birkneh T. Tadesse</span>
       </a>
 
@@ -41,31 +37,44 @@
         <a class="navlink" href="#blogs">Blogs</a>
       </nav>
 
-     <div class="top-actions">
-      <button id="btn-theme" class="btn btn-ghost" type="button" title="Toggle theme">
-        <i class="fa-solid fa-circle-half-stroke"></i>
-        <span class="hide-sm">Theme</span>
-      </button>
-    
-      <!-- Admin (only visible for you when enabled by JS / ?admin=1) -->
-      <button id="btn-admin" class="btn btn-ghost" type="button" hidden title="Admin">
-        <i class="fa-solid fa-pen-to-square"></i>
-        <span class="hide-sm">Admin</span>
-      </button>
-    
-      <a class="btn btn-primary" href="mailto:birknehtilahun@gmail.com">
-        <i class="fa-solid fa-envelope"></i>
-        <span class="hide-sm">Email</span>
-      </a>
-</div>
+      <div class="top-actions">
+        <button id="btn-theme" class="btn btn-ghost" type="button" title="Toggle theme">
+          <i class="fa-solid fa-circle-half-stroke"></i>
+          <span class="hide-sm">Theme</span>
+        </button>
+
+        <!-- Admin shows only when enabled by JS (?admin=1) -->
+        <button id="btn-admin" class="btn btn-ghost" type="button" hidden title="Admin">
+          <i class="fa-solid fa-pen-to-square"></i>
+          <span class="hide-sm">Admin</span>
+        </button>
+
+        <a class="btn btn-primary" href="mailto:birknehtilahun@gmail.com">
+          <i class="fa-solid fa-envelope"></i>
+          <span class="hide-sm">Email</span>
+        </a>
+      </div>
+    </div>
+  </header>
 
   <main id="top" class="page">
     <!-- HERO -->
     <section class="hero">
       <div class="hero-inner">
+        <div class="hero-right">
+          <div class="photo">
+            <img id="profile-photo" src="./image2.jpg" alt="Birkneh T. Tadesse" />
+            <div class="photo-fallback" aria-hidden="true">
+              <div class="photo-initials">BT</div>
+              <div class="photo-note">Place <code>image2.jpg</code> next to <code>index.html</code></div>
+            </div>
+          </div>
+        </div>
+
         <div class="hero-left">
           <div class="kicker">Physician–Epidemiologist • Vaccine Impact • Clinical Development</div>
           <h1 class="hero-title">Birkneh T. Tadesse <span class="hero-sub">MD PhD</span></h1>
+
           <p class="hero-lede">
             Global health leader advancing vaccine development, evaluation, and implementation across Africa, Asia, and Europe.
           </p>
@@ -90,8 +99,6 @@
               <i class="fa-solid fa-file-lines"></i> CV (PDF)
             </a>
           </div>
-          <div id="blog-posts" class="blog-grid" style="margin-top:14px;"></div>
-
 
           <div class="hero-meta">
             <div class="meta">
@@ -103,16 +110,9 @@
               <div class="meta-value">Seoul, Republic of Korea</div>
             </div>
           </div>
-        </div>
 
-        <div class="hero-right">
-          <div class="photo">
-            <img id="profile-photo" src="./image2.jpg" alt="Birkneh T. Tadesse" />
-            <div class="photo-fallback" aria-hidden="true">
-              <div class="photo-initials">BT</div>
-              <div class="photo-note">Place <code>image2.jpg</code> next to <code>index.html</code></div>
-            </div>
-          </div>
+          <!-- Latest blogs (auto-rendered) -->
+          <div id="blog-posts" class="blog-grid hero-blog-grid" aria-label="Latest blog posts"></div>
         </div>
       </div>
     </section>
@@ -149,7 +149,6 @@
                 LinkedIn content can’t be reliably embedded on external sites. Use “Open” to view the live post.
               </div>
 
-              <!-- Optional: paste a short excerpt of your post here (kept editable) -->
               <div class="post-excerpt" id="li-excerpt">
                 <b>Excerpt:</b> (optional) Paste 2–4 lines from your post here for a richer preview.
               </div>
@@ -191,7 +190,6 @@
     <!-- CV GRID -->
     <section class="content">
       <div class="grid-2">
-
         <!-- LEFT -->
         <div class="col">
           <section id="about" class="card">
@@ -462,7 +460,6 @@
             </div>
           </section>
         </div>
-
       </div>
     </section>
 
@@ -516,107 +513,89 @@
     <section id="blogs" class="card card-wide">
       <div class="card-h">
         <h2>Blogs</h2>
-        <span class="pill">Coming soon</span>
+        <span class="pill">Updates</span>
       </div>
 
-      <div class="blog-grid">
-        <div class="blog-card">
-          <div class="blog-title">Featured: LinkedIn post</div>
-          <div class="blog-meta muted">Interactive preview above • open on LinkedIn</div>
-          <div class="blog-actions">
-            <a class="btn btn-primary btn-sm" href="https://www.linkedin.com/feed/update/urn:li:activity:7429265326846013440/" target="_blank" rel="noreferrer">
-              <i class="fa-brands fa-linkedin"></i> View
-            </a>
-            <button class="btn btn-ghost btn-sm" type="button" id="btn-scroll-featured">
-              <i class="fa-solid fa-arrow-up"></i> Jump to Featured
-            </button>
-          </div>
-        </div>
-
-        <div class="blog-card">
-          <div class="blog-title">Blog post #1</div>
-          <div class="blog-meta muted">Add your first post here</div>
-          <div class="muted">Create a <code>blogs.json</code> later if you want these to auto-load.</div>
-        </div>
-      </div>
+      <div id="blogs-section" class="blog-grid"></div>
     </section>
 
     <footer class="footer">
       <div class="footer-inner">
         <span>© <span id="year-now"></span> Birkneh T. Tadesse</span>
-        <span class="muted"> </span>
+        <span class="muted"></span>
       </div>
     </footer>
   </main>
 
+  <!-- Admin modal -->
   <div id="admin-modal" class="modal" hidden>
-  <div class="modal-backdrop" data-close></div>
+    <div class="modal-backdrop" data-close></div>
 
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="admin-title">
-    <div class="modal-head">
-      <h2 id="admin-title">Blog Admin</h2>
-      <div class="modal-head-actions">
-        <button class="btn btn-ghost btn-sm" id="btn-admin-logout" type="button">
-          <i class="fa-solid fa-right-from-bracket"></i> Logout
-        </button>
-        <button class="btn btn-ghost btn-sm" id="btn-admin-close" type="button">
-          <i class="fa-solid fa-xmark"></i> Close
-        </button>
-      </div>
-    </div>
-
-    <div class="modal-body">
-      <div class="admin-note muted">
-        Posts saved here are stored in <b>your browser</b>. To publish to everyone, click <b>Download blogs.json</b> and commit it to your repo.
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="admin-title">
+      <div class="modal-head">
+        <h2 id="admin-title">Blog Admin</h2>
+        <div class="modal-head-actions">
+          <button class="btn btn-ghost btn-sm" id="btn-admin-logout" type="button">
+            <i class="fa-solid fa-right-from-bracket"></i> Logout
+          </button>
+          <button class="btn btn-ghost btn-sm" id="btn-admin-close" type="button">
+            <i class="fa-solid fa-xmark"></i> Close
+          </button>
+        </div>
       </div>
 
-      <div class="admin-grid">
-        <div class="field">
-          <label for="blog-title">Title</label>
-          <input id="blog-title" type="text" placeholder="e.g., Vaccine impact evaluation in LMICs" />
+      <div class="modal-body">
+        <div class="admin-note muted">
+          Drafts/published posts are saved in <b>your browser</b>. To publish for everyone, click <b>Download blogs.json</b> and commit it to your GitHub repo.
         </div>
 
-        <div class="field">
-          <label for="blog-author">Author</label>
-          <input id="blog-author" type="text" value="Birkneh T. Tadesse" />
-        </div>
-
-        <div class="field">
-          <label for="blog-status">Status</label>
-          <select id="blog-status">
-            <option value="draft">Draft (only you see)</option>
-            <option value="published">Published (shows on site after commit)</option>
-          </select>
-        </div>
-
-        <div class="field admin-full">
-          <label for="blog-content">Content</label>
-          <textarea id="blog-content" rows="10" placeholder="Write your post… (plain text)"></textarea>
-        </div>
-
-        <div class="admin-actions admin-full">
-          <button class="btn btn-primary" id="btn-blog-save" type="button">
-            <i class="fa-solid fa-paper-plane"></i> Save
-          </button>
-
-          <button class="btn btn-secondary" id="btn-blog-download" type="button">
-            <i class="fa-solid fa-download"></i> Download blogs.json
-          </button>
-
-          <span class="status" id="blog-admin-status"></span>
-        </div>
-
-        <div class="admin-full">
-          <div class="card-h" style="margin-top:8px;">
-            <h2 style="font-size:14px; margin:0;">Your posts</h2>
-            <span class="pill">Local</span>
+        <div class="admin-grid">
+          <div class="field">
+            <label for="blog-title">Title</label>
+            <input id="blog-title" type="text" placeholder="e.g., Vaccine impact evaluation in LMICs" />
           </div>
-          <div id="blog-admin-list"></div>
+
+          <div class="field">
+            <label for="blog-author">Author</label>
+            <input id="blog-author" type="text" value="Birkneh T. Tadesse" />
+          </div>
+
+          <div class="field">
+            <label for="blog-status">Status</label>
+            <select id="blog-status">
+              <option value="draft">Draft (only you see)</option>
+              <option value="published">Published (shows on site after commit)</option>
+            </select>
+          </div>
+
+          <div class="field admin-full">
+            <label for="blog-content">Content</label>
+            <textarea id="blog-content" rows="10" placeholder="Write your post…"></textarea>
+          </div>
+
+          <div class="admin-actions admin-full">
+            <button class="btn btn-primary" id="btn-blog-save" type="button">
+              <i class="fa-solid fa-floppy-disk"></i> Save
+            </button>
+
+            <button class="btn btn-secondary" id="btn-blog-download" type="button">
+              <i class="fa-solid fa-download"></i> Download blogs.json
+            </button>
+
+            <span class="status" id="blog-admin-status"></span>
+          </div>
+
+          <div class="admin-full">
+            <div class="card-h" style="margin-top:8px;">
+              <h2 style="font-size:14px; margin:0;">Your posts</h2>
+              <span class="pill">Local</span>
+            </div>
+            <div id="blog-admin-list"></div>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
 
   <script src="./script.js"></script>
 </body>
