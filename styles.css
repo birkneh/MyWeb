@@ -911,3 +911,45 @@ body .page .hero .hero-left{
     max-width: 100% !important;
   }
 }
+/* =========================================================
+   HERO — smaller Sachs-like white card (override)
+   Paste at VERY END of styles.css
+   ========================================================= */
+
+body .page .hero .hero-inner{
+  grid-template-columns: 380px 1fr !important;   /* slightly slimmer photo column */
+}
+
+body .page .hero .photo{
+  height: 500px !important;
+}
+
+body .page .hero .hero-left{
+  width: min(640px, 100%) !important;          /* SMALLER CARD */
+  max-width: 640px !important;
+
+  padding: 52px 58px !important;                /* tighter padding */
+  margin-left: -140px !important;               /* stronger overlap onto photo */
+}
+
+body .page .hero .hero-title{
+  font-size: clamp(44px, 5.2vw, 78px) !important;  /* slightly smaller headline */
+}
+
+body .page .hero .hero-lede{
+  max-width: 42ch !important;
+  font-size: clamp(17px, 1.5vw, 22px) !important;
+}
+
+@media (max-width: 1000px){
+  body .page .hero .hero-inner{
+    grid-template-columns: 1fr !important;
+  }
+  body .page .hero .hero-left{
+    margin-left: 0 !important;
+    margin-top: -34px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 34px 24px !important;
+  }
+}
