@@ -3,7 +3,7 @@
    ========================================================= */
 
 const PUBMED_AUTHOR_QUERY =
-  `(birkneh tilahun tadesse[Author] OR birkneh tilahun[Author] OR tadesse bt[Author])`;
+  `(birkneh tilahun tadesse[Author] OR birkneh tilahun[Author] or tadesse bt[Author])`;
 
 const EXCLUDE_TITLE_ABSTRACT = [
   `"food safety"[Title/Abstract]`,
@@ -14,17 +14,6 @@ const PUBMED_MAX = 250;
 const LOCAL_PUBLICATIONS_JSON = "./publications.json";
 const AUTO_FETCH_PUBMED_ON_LOAD = true;
 
-// NCBI eUtils best-practice parameters
-const NCBI_TOOL = "birkneh-cv-site";
-const NCBI_EMAIL = "birknehtilahun@gmail.com";
-
-// CORS fallback proxy (GitHub Pages often needs this for PubMed eUtils)
-const USE_PUBMED_CORS_PROXY_FALLBACK = true;
-const CORS_PROXY_PREFIX = "https://api.allorigins.win/raw?url=";
-
-// Timeout for network requests (ms)
-const FETCH_TIMEOUT_MS = 15000;
-
 /* =========================================================
    PUBLICATION REVIEW (ACCEPT/REJECT)
    ========================================================= */
@@ -33,27 +22,16 @@ const PUB_REVIEW_STORAGE_KEY = "pub_review_v1";
 let PUB_REVIEW = {}; // { key: "accepted" | "rejected" }
 
 function loadPubReview(){
-  try{
-    PUB_REVIEW = JSON.parse(localStorage.getItem(PUB_REVIEW_STORAGE_KEY) || "{}") || {};
-  }catch(e){
-    PUB_REVIEW = {};
-  }
+  try{ PUB_REVIEW = JSON.parse(localStorage.getItem(PUB_REVIEW_STORAGE_KEY) || "{}") || {}; }
+  catch(e){ PUB_REVIEW = {}; }
 }
 function savePubReview(){
   localStorage.setItem(PUB_REVIEW_STORAGE_KEY, JSON.stringify(PUB_REVIEW));
 }
 function pubKey(p){
-  if(p.doi){
-    return `doi:${String(p.doi)
-      .toLowerCase()
-      .replace(/^https?:\/\/(dx\.)?doi\.org\//i,"")
-      .trim()}`;
-  }
+  if(p.doi) return `doi:${String(p.doi).toLowerCase().replace(/^https?:\/\/(dx\.)?doi\.org\//i,"").trim()}`;
   if(p.pmid) return `pmid:${String(p.pmid).trim()}`;
-  return `t:${String(p.title||p.citation||"")
-    .toLowerCase()
-    .replace(/\s+/g," ")
-    .slice(0,160)}`;
+  return `t:${String(p.title||p.citation||"").toLowerCase().replace(/\s+/g," ").slice(0,160)}`;
 }
 function getReviewState(p){
   return PUB_REVIEW[pubKey(p)] || "unreviewed";
@@ -78,63 +56,6 @@ function esc(s){
 function setStatus(msg){
   const el = document.getElementById("pub-status");
   if(el) el.textContent = msg;
-  // helpful in GitHub Pages debugging
-  console.log("[pub-status]", msg);
-}
-
-function withTimeout(promise, ms=FETCH_TIMEOUT_MS){
-  const ac = new AbortController();
-  const t = setTimeout(()=>ac.abort(), ms);
-  return { ac, wrapped: Promise.resolve(promise).finally(()=>clearTimeout(t)) };
-}
-
-async function fetchText(url){
-  const ac = new AbortController();
-  const timer = setTimeout(()=>ac.abort(), FETCH_TIMEOUT_MS);
-  try{
-    const res = await fetch(url, { cache: "no-store", signal: ac.signal });
-    if(!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
-    return await res.text();
-  }finally{
-    clearTimeout(timer);
-  }
-}
-
-async function fetchJson(url){
-  const ac = new AbortController();
-  const timer = setTimeout(()=>ac.abort(), FETCH_TIMEOUT_MS);
-  try{
-    const res = await fetch(url, { cache: "no-store", signal: ac.signal });
-    if(!res.ok) throw new Error(`HTTP ${res.status} for ${url}`);
-    return await res.json();
-  }finally{
-    clearTimeout(timer);
-  }
-}
-
-// Try direct JSON fetch, then proxy if blocked (common on GitHub Pages)
-async function fetchJsonWithCorsFallback(url){
-  try{
-    return await fetchJson(url);
-  }catch(e){
-    const msg = String(e?.message || e);
-    const looksLikeCors =
-      msg.toLowerCase().includes("failed to fetch") ||
-      msg.toLowerCase().includes("cors") ||
-      msg.toLowerCase().includes("networkerror") ||
-      msg.toLowerCase().includes("abort");
-
-    if(!USE_PUBMED_CORS_PROXY_FALLBACK || !looksLikeCors) throw e;
-
-    const proxied = CORS_PROXY_PREFIX + encodeURIComponent(url);
-    // allorigins returns raw, so parse manually
-    const txt = await fetchText(proxied);
-    try{
-      return JSON.parse(txt);
-    }catch(parseErr){
-      throw new Error(`Proxy returned non-JSON for PubMed. First 120 chars: ${txt.slice(0,120)}`);
-    }
-  }
 }
 
 function scholarSearchLink(citationOrTitle){
@@ -187,12 +108,6 @@ function filterPublications(list, q){
   });
 }
 
-function chunk(arr, size){
-  const out = [];
-  for(let i=0;i<arr.length;i+=size) out.push(arr.slice(i,i+size));
-  return out;
-}
-
 /* =========================================================
    RENDER
    ========================================================= */
@@ -210,7 +125,6 @@ function renderPublications(){
   const filtered = filterPublications(PUBS, search);
   const sortedAll = sortPublications(filtered, sortMode);
 
-  // "all" hides rejected (your intended default)
   const sorted = sortedAll.filter(p=>{
     const st = getReviewState(p);
     if(reviewMode === "accepted") return st === "accepted";
@@ -409,58 +323,54 @@ function buildPubMedQuery(){
 async function fetchPubMed(){
   const base = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils";
   const term = encodeURIComponent(buildPubMedQuery());
-  const common = `&tool=${encodeURIComponent(NCBI_TOOL)}&email=${encodeURIComponent(NCBI_EMAIL)}`;
 
-  const esearchURL =
-    `${base}/esearch.fcgi?db=pubmed&retmode=json&retmax=${PUBMED_MAX}&sort=date&term=${term}${common}`;
-
-  const sJson = await fetchJsonWithCorsFallback(esearchURL);
+  const esearchURL = `${base}/esearch.fcgi?db=pubmed&retmode=json&retmax=${PUBMED_MAX}&sort=date&term=${term}`;
+  const sRes = await fetch(esearchURL, { cache: "no-store" });
+  if(!sRes.ok) throw new Error(`PubMed esearch failed: ${sRes.status}`);
+  const sJson = await sRes.json();
   const ids = (sJson?.esearchresult?.idlist || []).slice(0, PUBMED_MAX);
   if(ids.length === 0) return [];
 
-  // chunk to avoid URL length / server limits
+  const idStr = ids.join(",");
+  const esummaryURL = `${base}/esummary.fcgi?db=pubmed&retmode=json&id=${idStr}`;
+  const sumRes = await fetch(esummaryURL, { cache: "no-store" });
+  if(!sumRes.ok) throw new Error(`PubMed esummary failed: ${sumRes.status}`);
+  const sumJson = await sumRes.json();
+
+  const result = sumJson?.result || {};
+  const uids = result?.uids || [];
+
   const pubs = [];
-  for(const idChunk of chunk(ids, 200)){
-    const idStr = idChunk.join(",");
-    const esummaryURL =
-      `${base}/esummary.fcgi?db=pubmed&retmode=json&id=${idStr}${common}`;
+  for(const pmid of uids){
+    const it = result[pmid];
+    if(!it) continue;
 
-    const sumJson = await fetchJsonWithCorsFallback(esummaryURL);
+    const title = (it.title || "").replace(/\s+/g, " ").trim();
+    const journal = (it.fulljournalname || it.source || "").trim();
+    const pubdate = (it.pubdate || "").trim();
+    const yearMatch = pubdate.match(/\b(19|20)\d{2}\b/);
+    const year = yearMatch ? parseInt(yearMatch[0], 10) : null;
 
-    const result = sumJson?.result || {};
-    const uids = result?.uids || [];
+    const authors = Array.isArray(it.authors)
+      ? it.authors.map(a=>a.name).filter(Boolean).join(", ")
+      : "";
 
-    for(const pmid of uids){
-      const it = result[pmid];
-      if(!it) continue;
-
-      const title = (it.title || "").replace(/\s+/g, " ").trim();
-      const journal = (it.fulljournalname || it.source || "").trim();
-      const pubdate = (it.pubdate || "").trim();
-      const yearMatch = pubdate.match(/\b(19|20)\d{2}\b/);
-      const year = yearMatch ? parseInt(yearMatch[0], 10) : null;
-
-      const authors = Array.isArray(it.authors)
-        ? it.authors.map(a=>a.name).filter(Boolean).join(", ")
-        : "";
-
-      let doi = null;
-      if(Array.isArray(it.articleids)){
-        const doiObj = it.articleids.find(x => x.idtype === "doi" && x.value);
-        if(doiObj) doi = doiObj.value;
-      }
-
-      pubs.push({
-        pmid: String(pmid),
-        title,
-        authors,
-        journal,
-        year,
-        doi,
-        url: doi ? `https://doi.org/${doi}` : `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`,
-        citation: ""
-      });
+    let doi = null;
+    if(Array.isArray(it.articleids)){
+      const doiObj = it.articleids.find(x => x.idtype === "doi" && x.value);
+      if(doiObj) doi = doiObj.value;
     }
+
+    pubs.push({
+      pmid: String(pmid),
+      title,
+      authors,
+      journal,
+      year,
+      doi,
+      url: doi ? `https://doi.org/${doi}` : `https://pubmed.ncbi.nlm.nih.gov/${pmid}/`,
+      citation: ""
+    });
   }
 
   return pubs;
@@ -470,10 +380,9 @@ function dedupePubs(pubs){
   const seen = new Set();
   const out = [];
   for(const p of pubs){
-    const key =
-      p.doi ? `doi:${String(p.doi).toLowerCase().replace(/^https?:\/\/(dx\.)?doi\.org\//i,"").trim()}` :
-      p.pmid ? `pmid:${String(p.pmid).trim()}` :
-      `t:${String(p.title||p.citation||"").toLowerCase().slice(0,160)}`;
+    const key = (p.doi ? `doi:${String(p.doi).toLowerCase()}` :
+                p.pmid ? `pmid:${String(p.pmid)}` :
+                `t:${String(p.title||p.citation||"").toLowerCase().slice(0,160)}`);
     if(seen.has(key)) continue;
     seen.add(key);
     out.push(p);
@@ -484,12 +393,12 @@ function dedupePubs(pubs){
 function mergePreferLocal(online, local){
   const byKey = new Map();
   function keyOf(p){
-    if(p.doi) return `doi:${String(p.doi).toLowerCase().replace(/^https?:\/\/(dx\.)?doi\.org\//i,"").trim()}`;
-    if(p.pmid) return `pmid:${String(p.pmid).trim()}`;
+    if(p.doi) return `doi:${String(p.doi).toLowerCase()}`;
+    if(p.pmid) return `pmid:${String(p.pmid)}`;
     return `t:${String(p.title||p.citation||"").toLowerCase().slice(0,160)}`;
   }
 
-  for(const p of online) byKey.set(keyOf(p), { ...p });
+  for(const p of online) byKey.set(keyOf(p), {...p});
 
   for(const lp of local){
     const k = keyOf(lp);
@@ -499,14 +408,13 @@ function mergePreferLocal(online, local){
       if(lp.url) merged.url = lp.url;
       byKey.set(k, merged);
     }else{
-      byKey.set(k, { ...lp });
+      byKey.set(k, {...lp});
     }
   }
-
   return Array.from(byKey.values());
 }
 
-async function loadPublications({preferPubMed=true} = {}){
+async function loadPublications({preferPubMed=true}={}){
   setStatus("Loading publications…");
   const local = await loadLocalPublications();
 
@@ -592,20 +500,6 @@ function initFeaturedLinkedIn(){
     });
   }
 
-  // Make the whole card clickable (but don't hijack button/link clicks inside it)
-  if(card){
-    card.style.cursor = "pointer";
-    card.addEventListener("click", (e)=>{
-      const t = e.target;
-      const isInteractive =
-        t?.closest?.("a") || t?.closest?.("button") || t?.closest?.("input") || t?.closest?.("select");
-      if(isInteractive) return;
-
-      const url = card.getAttribute("data-url") || "";
-      if(url) window.open(url, "_blank", "noreferrer");
-    });
-  }
-
   if(copyBtn && card){
     copyBtn.addEventListener("click", async ()=>{
       const url = card.getAttribute("data-url") || "";
@@ -622,8 +516,7 @@ function initFeaturedLinkedIn(){
 
   if(jumpBtn){
     jumpBtn.addEventListener("click", ()=>{
-      const target = document.getElementById("li-card") || document.querySelector(".featured");
-      if(target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
   }
 }
@@ -633,19 +526,14 @@ function initFeaturedLinkedIn(){
    ========================================================= */
 
 window.addEventListener("DOMContentLoaded", async ()=>{
-  document.getElementById("year-now")?.textContent = new Date().getFullYear();
-  document.getElementById("last-updated")?.textContent = new Date().toLocaleDateString();
+  document.getElementById("year-now").textContent = new Date().getFullYear();
+  document.getElementById("last-updated").textContent = new Date().toLocaleDateString();
 
   initTheme();
   initPhoto();
   initFeaturedLinkedIn();
 
   loadPubReview();
-
-  // Helpful on GitHub Pages
-  if (location.hostname.includes("github.io")) {
-    console.log("Running on GitHub Pages:", location.href);
-  }
 
   PUBS = await loadPublications({ preferPubMed: AUTO_FETCH_PUBMED_ON_LOAD });
   renderPublications();
@@ -657,7 +545,7 @@ window.addEventListener("DOMContentLoaded", async ()=>{
   document.getElementById("btn-refresh")?.addEventListener("click", async ()=>{
     setStatus("Refreshing from PubMed…");
     PUBS = await loadPublications({ preferPubMed: true });
-    document.getElementById("last-updated")?.textContent = new Date().toLocaleString();
+    document.getElementById("last-updated").textContent = new Date().toLocaleString();
     renderPublications();
   });
 
