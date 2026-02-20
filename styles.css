@@ -1068,3 +1068,26 @@ html body main.page section.hero .hero-lede{
     padding: 30px 22px !important;
   }
 }
+/* === HERO: put white box to the RIGHT of the photo (no overlap) === */
+html body main.page section.hero .hero-inner{
+  grid-template-columns: 340px minmax(0, 1fr) !important;
+  align-items: stretch !important;
+  gap: 34px !important;               /* space between photo and box */
+}
+
+html body main.page section.hero .hero-left{
+  margin-left: 0 !important;          /* remove overlap */
+  justify-self: stretch !important;   /* let it sit naturally */
+  width: auto !important;
+  max-width: none !important;
+}
+
+@media (max-width: 900px){
+  html body main.page section.hero .hero-inner{
+    grid-template-columns: 1fr !important;
+    gap: 18px !important;
+  }
+  html body main.page section.hero .hero-left{
+    margin-top: 0 !important;
+  }
+}
