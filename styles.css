@@ -1091,3 +1091,20 @@ html body main.page section.hero .hero-left{
     margin-top: 0 !important;
   }
 }
+
+/* STOP hero overlap: force a real gap between photo and white box */
+html body main.page section.hero .hero-inner{
+  gap: 40px !important;                 /* space between photo and card */
+}
+
+html body main.page section.hero .hero-left{
+  margin-left: 0 !important;            /* <-- this is the main overlap fix */
+  transform: none !important;           /* in case an older rule is shifting it */
+  position: relative !important;
+  z-index: 1 !important;                /* don't float above photo */
+}
+
+/* optional: ensure photo stays in its own column */
+html body main.page section.hero .hero-right{
+  z-index: 0 !important;
+}
