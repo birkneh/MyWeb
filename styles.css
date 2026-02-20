@@ -643,3 +643,249 @@ body.dark .blog-card{ background: rgba(255,255,255,0.04); }
   font-weight: 900;
   border-top: 1px solid var(--border);
 }
+/* =========================================================
+   Editorial overrides (Jeff Sachs-like)
+   Paste at END of your current styles.css
+   ========================================================= */
+
+/* Softer paper background + typography */
+:root{
+  --bg: #f6f2ea;
+  --panel: #ffffff;
+  --text: #111111;
+  --muted: rgba(17,17,17,0.68);
+  --border: rgba(17,17,17,0.10);
+
+  --shadow: 0 18px 60px rgba(0,0,0,0.12);
+  --shadow2: 0 14px 45px rgba(0,0,0,0.10);
+
+  --radius: 18px;
+  --radius2: 18px;
+
+  --topbar-h: 92px;
+
+  --font: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  --serif: "EB Garamond", Georgia, serif;
+}
+
+body{ background: var(--bg); }
+
+/* Page spacing to match new topbar height */
+.page{
+  padding-top: calc(var(--topbar-h) + 18px);
+}
+
+/* =========================================================
+   Header: centered, uppercase nav + simple “logo” square
+   ========================================================= */
+.topbar{
+  background: rgba(246,242,234,0.88);
+  border-bottom: 1px solid var(--border);
+}
+body.dark .topbar{ background: rgba(10,16,32,0.55); }
+
+.topbar-inner{
+  display: grid;
+  grid-template-columns: 170px 1fr 220px;
+  align-items: center;
+  justify-content: initial;
+}
+
+/* Square logo like JDS */
+.brand{
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+.brand-mark{
+  width: 64px;
+  height: 64px;
+  border-radius: 2px;
+  background: transparent;
+  border: 2px solid rgba(17,17,17,.65);
+  box-shadow: none;
+  position: relative;
+}
+.brand-mark::after{
+  content: "BT";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--serif);
+  font-size: 24px;
+  letter-spacing: .06em;
+  color: rgba(17,17,17,.85);
+}
+body.dark .brand-mark{
+  border-color: rgba(255,255,255,.65);
+}
+body.dark .brand-mark::after{
+  color: rgba(255,255,255,.90);
+}
+
+/* Center nav + uppercase tracking */
+.nav{
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap; /* allows 2 rows */
+}
+.navlink{
+  font-size: 12px;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(17,17,17,.78);
+  padding: 6px 2px;
+  border-radius: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+}
+.navlink:hover{
+  color: rgba(17,17,17,.95);
+  background: transparent;
+  border-bottom-color: rgba(17,17,17,.25);
+}
+body.dark .navlink{
+  color: rgba(255,255,255,.78);
+}
+body.dark .navlink:hover{
+  color: rgba(255,255,255,.95);
+  border-bottom-color: rgba(255,255,255,.25);
+}
+
+/* Buttons: calmer */
+.btn{
+  border-radius: 999px;
+  font-weight: 700;
+  background: rgba(255,255,255,0.55);
+}
+body.dark .btn{ background: rgba(255,255,255,0.08); }
+.btn:hover{
+  transform: none;
+  box-shadow: none;
+  background: rgba(255,255,255,0.80);
+}
+body.dark .btn:hover{ background: rgba(255,255,255,0.12); }
+
+.btn-primary{
+  background: rgba(17,17,17,0.92);
+  border-color: rgba(17,17,17,0.92);
+}
+.btn-primary:hover{ background: rgba(17,17,17,0.80); }
+body.dark .btn-primary{
+  background: rgba(255,255,255,0.92);
+  border-color: rgba(255,255,255,0.92);
+  color: #111;
+}
+body.dark .btn-primary:hover{ background: rgba(255,255,255,0.80); }
+
+/* =========================================================
+   Hero: photo LEFT + overlapping white card on the RIGHT
+   ========================================================= */
+.hero{ margin-top: 22px; }
+
+.hero-inner{
+  /* remove the “single big card” look */
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+
+  display: grid;
+  grid-template-columns: 1.05fr .95fr;
+  gap: 42px;
+  align-items: center;
+}
+
+/* Put photo on the left without changing HTML */
+.hero-right{ grid-column: 1; }
+.hero-left{
+  grid-column: 2;
+
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius2);
+  box-shadow: var(--shadow);
+  padding: 44px;
+  transform: translateX(-90px); /* overlap onto the photo */
+  z-index: 2;
+}
+
+.kicker{
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  color: rgba(17,17,17,.60);
+}
+.hero-title{
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(40px, 4.2vw, 64px);
+  line-height: 1.03;
+  letter-spacing: .01em;
+  margin: 10px 0 14px;
+}
+.hero-sub{
+  font-weight: 500;
+  color: rgba(17,17,17,.62);
+  font-size: 0.55em;
+  margin-left: 8px;
+}
+.hero-lede{
+  font-weight: 400;
+  color: rgba(17,17,17,.68);
+  max-width: 52ch;
+}
+
+/* Make photo feel like the reference: larger, landscape */
+.photo{
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  min-height: 320px;
+  border-radius: var(--radius2);
+  box-shadow: var(--shadow2);
+}
+
+/* Chips: calmer, less “app UI” */
+.chip{
+  font-weight: 600;
+  background: rgba(255,255,255,0.60);
+}
+.chip:hover{
+  transform: none;
+  background: rgba(255,255,255,0.85);
+}
+
+/* Cards: softer, more editorial */
+.card{
+  border-radius: var(--radius2);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.06);
+}
+.card-h h2{
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 28px;
+}
+
+/* Responsive: stack and remove overlap */
+@media (max-width: 900px){
+  :root{ --topbar-h: 82px; }
+
+  .topbar-inner{
+    grid-template-columns: 92px 1fr 92px;
+  }
+  .brand-text{ display: none; }
+
+  .hero-inner{
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .hero-right{ grid-column: auto; }
+  .hero-left{
+    grid-column: auto;
+    transform: none;
+    padding: 30px 24px;
+  }
+}
