@@ -41,18 +41,23 @@
         <a class="navlink" href="#blogs">Blogs</a>
       </nav>
 
-      <div class="top-actions">
-        <button id="btn-theme" class="btn btn-ghost" type="button" title="Toggle theme">
-          <i class="fa-solid fa-circle-half-stroke"></i>
-          <span class="hide-sm">Theme</span>
-        </button>
-        <a class="btn btn-primary" href="mailto:birknehtilahun@gmail.com">
-          <i class="fa-solid fa-envelope"></i>
-          <span class="hide-sm">Email</span>
-        </a>
-      </div>
-    </div>
-  </header>
+     <div class="top-actions">
+      <button id="btn-theme" class="btn btn-ghost" type="button" title="Toggle theme">
+        <i class="fa-solid fa-circle-half-stroke"></i>
+        <span class="hide-sm">Theme</span>
+      </button>
+    
+      <!-- Admin (only visible for you when enabled by JS / ?admin=1) -->
+      <button id="btn-admin" class="btn btn-ghost" type="button" hidden title="Admin">
+        <i class="fa-solid fa-pen-to-square"></i>
+        <span class="hide-sm">Admin</span>
+      </button>
+    
+      <a class="btn btn-primary" href="mailto:birknehtilahun@gmail.com">
+        <i class="fa-solid fa-envelope"></i>
+        <span class="hide-sm">Email</span>
+      </a>
+</div>
 
   <main id="top" class="page">
     <!-- HERO -->
@@ -85,6 +90,8 @@
               <i class="fa-solid fa-file-lines"></i> CV (PDF)
             </a>
           </div>
+          <div id="blog-posts" class="blog-grid" style="margin-top:14px;"></div>
+
 
           <div class="hero-meta">
             <div class="meta">
@@ -541,6 +548,75 @@
       </div>
     </footer>
   </main>
+
+  <div id="admin-modal" class="modal" hidden>
+  <div class="modal-backdrop" data-close></div>
+
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="admin-title">
+    <div class="modal-head">
+      <h2 id="admin-title">Blog Admin</h2>
+      <div class="modal-head-actions">
+        <button class="btn btn-ghost btn-sm" id="btn-admin-logout" type="button">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+        <button class="btn btn-ghost btn-sm" id="btn-admin-close" type="button">
+          <i class="fa-solid fa-xmark"></i> Close
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <div class="admin-note muted">
+        Posts saved here are stored in <b>your browser</b>. To publish to everyone, click <b>Download blogs.json</b> and commit it to your repo.
+      </div>
+
+      <div class="admin-grid">
+        <div class="field">
+          <label for="blog-title">Title</label>
+          <input id="blog-title" type="text" placeholder="e.g., Vaccine impact evaluation in LMICs" />
+        </div>
+
+        <div class="field">
+          <label for="blog-author">Author</label>
+          <input id="blog-author" type="text" value="Birkneh T. Tadesse" />
+        </div>
+
+        <div class="field">
+          <label for="blog-status">Status</label>
+          <select id="blog-status">
+            <option value="draft">Draft (only you see)</option>
+            <option value="published">Published (shows on site after commit)</option>
+          </select>
+        </div>
+
+        <div class="field admin-full">
+          <label for="blog-content">Content</label>
+          <textarea id="blog-content" rows="10" placeholder="Write your post… (plain text)"></textarea>
+        </div>
+
+        <div class="admin-actions admin-full">
+          <button class="btn btn-primary" id="btn-blog-save" type="button">
+            <i class="fa-solid fa-paper-plane"></i> Save
+          </button>
+
+          <button class="btn btn-secondary" id="btn-blog-download" type="button">
+            <i class="fa-solid fa-download"></i> Download blogs.json
+          </button>
+
+          <span class="status" id="blog-admin-status"></span>
+        </div>
+
+        <div class="admin-full">
+          <div class="card-h" style="margin-top:8px;">
+            <h2 style="font-size:14px; margin:0;">Your posts</h2>
+            <span class="pill">Local</span>
+          </div>
+          <div id="blog-admin-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
   <script src="./script.js"></script>
 </body>
