@@ -849,262 +849,48 @@ body.dark .admin-row{ background: rgba(255,255,255,0.05); }
   }
 }
 /* =========================================================
-   HERO HARD OVERRIDE — forces the white card NOT to stretch
-   Paste at VERY END of styles.css
+   HERO — non-overlapping (photo left, card right)
+   Keep this as the ONLY hero override at the end
    ========================================================= */
 
-body .page .hero .hero-inner{
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-
-  display: grid !important;
-  grid-template-columns: 420px 1fr !important;
-  align-items: center !important;
-  gap: 0 !important;
-}
-
-body .page .hero .hero-right{
-  grid-column: 1 !important;
-  align-self: stretch !important;
-}
-
-body .page .hero .photo{
-  width: 100% !important;
-  height: 520px !important;
-  border-radius: 0 !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-
-body .page .hero .hero-left{
-  grid-column: 2 !important;
-
-  /* CRITICAL: stop grid stretching */
-  justify-self: start !important;
-  width: min(720px, 100%) !important;
-  max-width: 720px !important;
-
-  background: #fff !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: 0 24px 80px rgba(0,0,0,.12) !important;
-
-  padding: 60px 70px !important;
-  margin-left: -120px !important;
-  z-index: 2 !important;
-}
-
-@media (max-width: 1000px){
-  body .page .hero .hero-inner{
-    grid-template-columns: 1fr !important;
-  }
-  body .page .hero .photo{
-    height: 380px !important;
-  }
-  body .page .hero .hero-left{
-    margin-left: 0 !important;
-    margin-top: -40px !important;
-    padding: 40px 30px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-}
-/* =========================================================
-   HERO — smaller Sachs-like white card (override)
-   Paste at VERY END of styles.css
-   ========================================================= */
-
-body .page .hero .hero-inner{
-  grid-template-columns: 380px 1fr !important;   /* slightly slimmer photo column */
-}
-
-body .page .hero .photo{
-  height: 500px !important;
-}
-
-body .page .hero .hero-left{
-  width: min(640px, 100%) !important;          /* SMALLER CARD */
-  max-width: 640px !important;
-
-  padding: 52px 58px !important;                /* tighter padding */
-  margin-left: -140px !important;               /* stronger overlap onto photo */
-}
-
-body .page .hero .hero-title{
-  font-size: clamp(44px, 5.2vw, 78px) !important;  /* slightly smaller headline */
-}
-
-body .page .hero .hero-lede{
-  max-width: 42ch !important;
-  font-size: clamp(17px, 1.5vw, 22px) !important;
-}
-
-@media (max-width: 1000px){
-  body .page .hero .hero-inner{
-    grid-template-columns: 1fr !important;
-  }
-  body .page .hero .hero-left{
-    margin-left: 0 !important;
-    margin-top: -34px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 34px 24px !important;
-  }
-}
-/* =========================================================
-   FINAL FORCE: smaller Sachs-like hero card
-   (PASTE AS THE VERY LAST LINES IN styles.css)
-   ========================================================= */
-
-html body main.page section.hero .hero-inner{
-  display: grid !important;
-  grid-template-columns: 340px minmax(0,1fr) !important;
-  gap: 0 !important;
-  align-items: stretch !important;
-}
-
-html body main.page section.hero .hero-right{
-  grid-column: 1 !important;
-  align-self: stretch !important;
-}
-
-html body main.page section.hero .photo{
-  width: 100% !important;
-  height: 520px !important;
-  border-radius: 0 !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  overflow: hidden !important;
-}
-
-html body main.page section.hero .photo img{
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-}
-
-html body main.page section.hero .hero-left{
-  grid-column: 2 !important;
-
-  /* make the white box smaller */
-  width: 600px !important;
-  max-width: 600px !important;
-
-  padding: 44px 50px !important;
-
-  /* overlap */
-  margin-left: -130px !important;
-
-  background: #fff !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  box-shadow: 0 22px 70px rgba(0,0,0,.12) !important;
-  z-index: 2 !important;
-}
-
-html body main.page section.hero .hero-title{
-  font-size: clamp(44px, 5vw, 74px) !important;
-  line-height: 1.02 !important;
-}
-
-html body main.page section.hero .hero-lede{
-  font-size: clamp(17px, 1.5vw, 21px) !important;
-  max-width: 42ch !important;
-}
-
-@media (max-width: 900px){
-  html body main.page section.hero .hero-inner{
-    grid-template-columns: 1fr !important;
-  }
-  html body main.page section.hero .hero-left{
-    width: 100% !important;
-    max-width: 100% !important;
-    margin-left: 0 !important;
-    margin-top: -26px !important;
-    padding: 30px 22px !important;
-  }
-}
-
-/* === HERO (single final override) === */
 .hero-inner{
-  display:grid !important;
-  grid-template-columns: 340px minmax(0,1fr) !important;
-  gap:0 !important;
-  align-items:stretch !important;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 40px;                 /* space between photo and box */
+  align-items: stretch;
 }
 
-.hero-right{ align-self:stretch !important; }
-
-.photo{
-  height: 520px !important;
-  border-radius: 0 !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  overflow:hidden !important;
-}
-
+.hero-right{ grid-column: 1; align-self: stretch; }
 .hero-left{
-  justify-self: start !important;
-  width: min(600px, 100%) !important;
-  max-width: 600px !important;
-  padding: 44px 50px !important;
-  margin-left: -130px !important;
-  border-radius: 0 !important;
-  border: 0 !important;
-  background: #fff !important;
-  box-shadow: 0 22px 70px rgba(0,0,0,.12) !important;
-  z-index: 2 !important;
+  grid-column: 2;
+  margin-left: 0;            /* IMPORTANT: no overlap */
+  transform: none;           /* IMPORTANT: no shifting */
+  width: auto;
+  max-width: none;
+  justify-self: stretch;
+  z-index: 1;
 }
 
+/* photo sizing */
+.photo{
+  width: 100%;
+  height: 520px;
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+  overflow: hidden;
+}
+.photo img{ width:100%; height:100%; object-fit: cover; display:block; }
+
+/* mobile */
 @media (max-width: 900px){
-  .hero-inner{ grid-template-columns: 1fr !important; }
-  .hero-left{
-    margin-left: 0 !important;
-    margin-top: -26px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    padding: 30px 22px !important;
-  }
-}
-/* === HERO: put white box to the RIGHT of the photo (no overlap) === */
-html body main.page section.hero .hero-inner{
-  grid-template-columns: 340px minmax(0, 1fr) !important;
-  align-items: stretch !important;
-  gap: 34px !important;               /* space between photo and box */
-}
-
-html body main.page section.hero .hero-left{
-  margin-left: 0 !important;          /* remove overlap */
-  justify-self: stretch !important;   /* let it sit naturally */
-  width: auto !important;
-  max-width: none !important;
-}
-
-@media (max-width: 900px){
-  html body main.page section.hero .hero-inner{
-    grid-template-columns: 1fr !important;
-    gap: 18px !important;
-  }
-  html body main.page section.hero .hero-left{
-    margin-top: 0 !important;
-  }
-}
-
-/* STOP hero overlap: force a real gap between photo and white box */
-html body main.page section.hero .hero-inner{
-  gap: 40px !important;                 /* space between photo and card */
-}
-
-html body main.page section.hero .hero-left{
-  margin-left: 0 !important;            /* <-- this is the main overlap fix */
-  transform: none !important;           /* in case an older rule is shifting it */
-  position: relative !important;
-  z-index: 1 !important;                /* don't float above photo */
-}
-
-/* optional: ensure photo stays in its own column */
-html body main.page section.hero .hero-right{
-  z-index: 0 !important;
+  .hero-inner{ grid-template-columns: 1fr; gap: 18px; }
+  .hero-right{ grid-column: auto; }
+  .hero-left{ grid-column: auto; }
+  .photo{ height: 380px; }
 }
