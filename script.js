@@ -557,3 +557,403 @@ window.addEventListener("DOMContentLoaded", async ()=>{
     renderPublications();
   });
 });
+/* =========================================================
+   BLOGS + ADMIN (GitHub Pages-friendly)
+   ========================================================= */
+
+const BLOGS_REMOTE_JSON = "./blogs.json";        // optional public file (commit this)
+const BLOGS_LOCAL_KEY = "blogs_local_v1";        // your private browser storage
+const ADMIN_HASH_KEY = "admin_hash_v1";
+const ADMIN_OK_KEY = "admin_ok_v1";
+
+let BLOGS_REMOTE = [];
+let BLOGS_LOCAL = [];
+
+function blogEsc(s){
+  return String(s ?? "").replace(/[&<>"]/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"
+  }[c]));
+}
+
+function blogSetAdminStatus(msg){
+  const el = document.getElementById("blog-admin-status");
+  if(el) el.textContent = msg;
+}
+
+function blogNowISO(){ return new Date().toISOString(); }
+
+function blogSlugify(title){
+  return String(title || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80) || "post";
+}
+
+function blogLoadLocal(){
+  try{
+    BLOGS_LOCAL = JSON.parse(localStorage.getItem(BLOGS_LOCAL_KEY) || "[]") || [];
+    if(!Array.isArray(BLOGS_LOCAL)) BLOGS_LOCAL = [];
+  }catch(e){
+    BLOGS_LOCAL = [];
+  }
+}
+
+function blogSaveLocal(){
+  localStorage.setItem(BLOGS_LOCAL_KEY, JSON.stringify(BLOGS_LOCAL));
+}
+
+async function blogLoadRemote(){
+  try{
+    const r = await fetch(BLOGS_REMOTE_JSON, { cache: "no-store" });
+    if(!r.ok) throw new Error(String(r.status));
+    const data = await r.json();
+    BLOGS_REMOTE = Array.isArray(data) ? data : [];
+  }catch(e){
+    BLOGS_REMOTE = [];
+  }
+}
+
+function blogNormalize(p){
+  const postedAt = p.postedAt || p.createdAt || null;
+  return {
+    id: p.id || `${p.slug || blogSlugify(p.title)}-${(postedAt||"").slice(0,10) || "x"}`,
+    title: p.title || "Untitled",
+    slug: p.slug || blogSlugify(p.title),
+    author: p.author || "Birkneh T. Tadesse",
+    status: p.status || "published",           // published | draft
+    postedAt: postedAt || blogNowISO(),
+    content: p.content || "",
+    source: p.source || "remote"              // remote | local
+  };
+}
+
+function blogSortNewest(a,b){
+  return new Date(b.postedAt).getTime() - new Date(a.postedAt).getTime();
+}
+
+function blogFormatDate(iso){
+  try{
+    return new Date(iso).toLocaleDateString(undefined, { year:"numeric", month:"short", day:"2-digit" });
+  }catch(e){
+    return iso || "";
+  }
+}
+
+function renderBlogCards(){
+  const container = document.getElementById("blog-posts");
+  if(!container) return;
+
+  const isAdmin = localStorage.getItem(ADMIN_OK_KEY) === "1";
+
+  const remote = BLOGS_REMOTE.map(b => blogNormalize({ ...b, source:"remote" }));
+  const local = BLOGS_LOCAL.map(b => blogNormalize({ ...b, source:"local" }));
+
+  // Only show published to public visitors; admin sees drafts too
+  const combined = [...remote, ...local]
+    .filter(p => isAdmin ? true : p.status === "published")
+    .sort(blogSortNewest);
+
+  container.innerHTML = "";
+
+  if(combined.length === 0){
+    container.innerHTML = `<div class="muted">No blog posts yet.</div>`;
+    return;
+  }
+
+  for(const post of combined){
+    const card = document.createElement("div");
+    card.className = "blog-card";
+
+    const metaLine = `Posted ${blogEsc(blogFormatDate(post.postedAt))} • by ${blogEsc(post.author)}`
+      + (post.source === "local" ? ` • <b>LOCAL</b>` : "");
+
+    const excerpt = post.content.trim().slice(0, 220);
+
+    card.innerHTML = `
+      <div class="blog-title">${blogEsc(post.title)}</div>
+      <div class="blog-meta muted">${metaLine}</div>
+      <div class="muted" style="margin-top:10px; line-height:1.6;">
+        ${blogEsc(excerpt)}${post.content.length > 220 ? "…" : ""}
+      </div>
+      <div class="blog-actions">
+        <button class="btn btn-ghost btn-sm" type="button" data-read="${blogEsc(post.id)}">
+          <i class="fa-solid fa-book-open"></i> Read
+        </button>
+      </div>
+      <div class="muted" data-full="${blogEsc(post.id)}" hidden style="margin-top:12px; white-space:pre-wrap; line-height:1.7;">
+        ${blogEsc(post.content)}
+      </div>
+    `;
+    container.appendChild(card);
+  }
+
+  // Read toggles
+  container.querySelectorAll("[data-read]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.getAttribute("data-read");
+      const full = container.querySelector(`[data-full="${CSS.escape(id)}"]`);
+      if(!full) return;
+      const hidden = full.hasAttribute("hidden");
+      if(hidden) full.removeAttribute("hidden");
+      else full.setAttribute("hidden", "");
+    });
+  });
+}
+
+/* ---------- Admin auth (local only) ---------- */
+
+function bufToHex(buffer){
+  return [...new Uint8Array(buffer)].map(b => b.toString(16).padStart(2,"0")).join("");
+}
+async function sha256(str){
+  const enc = new TextEncoder().encode(str);
+  const buf = await crypto.subtle.digest("SHA-256", enc);
+  return bufToHex(buf);
+}
+
+async function ensureAdminLogin(){
+  const existingHash = localStorage.getItem(ADMIN_HASH_KEY);
+
+  if(!existingHash){
+    const p1 = prompt("Set an admin passphrase (store only on this device):");
+    if(!p1) return false;
+    const p2 = prompt("Confirm passphrase:");
+    if(!p2 || p2 !== p1){
+      alert("Passphrases did not match.");
+      return false;
+    }
+    const h = await sha256(p1);
+    localStorage.setItem(ADMIN_HASH_KEY, h);
+    localStorage.setItem(ADMIN_OK_KEY, "1");
+    return true;
+  }else{
+    const p = prompt("Admin passphrase:");
+    if(!p) return false;
+    const h = await sha256(p);
+    if(h !== existingHash){
+      alert("Incorrect passphrase.");
+      return false;
+    }
+    localStorage.setItem(ADMIN_OK_KEY, "1");
+    return true;
+  }
+}
+
+function adminLogout(){
+  localStorage.removeItem(ADMIN_OK_KEY);
+}
+
+/* ---------- Admin UI ---------- */
+
+function openAdminModal(){
+  const modal = document.getElementById("admin-modal");
+  if(!modal) return;
+  modal.removeAttribute("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closeAdminModal(){
+  const modal = document.getElementById("admin-modal");
+  if(!modal) return;
+  modal.setAttribute("hidden", "");
+  document.body.style.overflow = "";
+}
+
+function renderAdminList(){
+  const list = document.getElementById("blog-admin-list");
+  if(!list) return;
+
+  const rows = BLOGS_LOCAL
+    .map(blogNormalize)
+    .sort(blogSortNewest);
+
+  list.innerHTML = "";
+
+  if(rows.length === 0){
+    list.innerHTML = `<div class="muted">No local posts yet.</div>`;
+    return;
+  }
+
+  for(const p of rows){
+    const row = document.createElement("div");
+    row.className = "admin-row";
+    row.innerHTML = `
+      <div>
+        <div><b>${blogEsc(p.title)}</b> ${p.status === "draft" ? `<span class="pill" style="margin-left:8px;">Draft</span>` : ``}</div>
+        <div class="meta">Posted ${blogEsc(blogFormatDate(p.postedAt))} • by ${blogEsc(p.author)}</div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="btn btn-ghost btn-sm" type="button" data-edit="${blogEsc(p.id)}">
+          <i class="fa-solid fa-pen"></i> Edit
+        </button>
+        <button class="btn btn-ghost btn-sm" type="button" data-del="${blogEsc(p.id)}">
+          <i class="fa-solid fa-trash"></i> Delete
+        </button>
+      </div>
+    `;
+    list.appendChild(row);
+  }
+
+  list.querySelectorAll("[data-edit]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.getAttribute("data-edit");
+      const p = BLOGS_LOCAL.map(blogNormalize).find(x => x.id === id);
+      if(!p) return;
+      document.getElementById("blog-title").value = p.title;
+      document.getElementById("blog-author").value = p.author;
+      document.getElementById("blog-status").value = p.status;
+      document.getElementById("blog-content").value = p.content;
+      document.getElementById("blog-title").setAttribute("data-editing-id", p.id);
+      blogSetAdminStatus("Editing existing post.");
+    });
+  });
+
+  list.querySelectorAll("[data-del]").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      const id = btn.getAttribute("data-del");
+      const ok = confirm("Delete this local post?");
+      if(!ok) return;
+      BLOGS_LOCAL = BLOGS_LOCAL.map(blogNormalize).filter(x => x.id !== id);
+      blogSaveLocal();
+      renderAdminList();
+      renderBlogCards();
+      blogSetAdminStatus("Deleted.");
+    });
+  });
+}
+
+function downloadBlogsJson(){
+  // Combine remote + local, but only published for public file
+  const remote = BLOGS_REMOTE.map(b => blogNormalize({ ...b, source:"remote" }));
+  const localPublished = BLOGS_LOCAL.map(b => blogNormalize({ ...b, source:"local" }))
+    .filter(p => p.status === "published");
+
+  // Prefer local if same slug/date id
+  const byId = new Map();
+  for(const p of remote) byId.set(p.id, p);
+  for(const p of localPublished) byId.set(p.id, p);
+
+  const out = Array.from(byId.values())
+    .map(p => ({
+      title: p.title,
+      slug: p.slug,
+      author: p.author,
+      status: "published",
+      postedAt: p.postedAt,
+      content: p.content
+    }))
+    .sort(blogSortNewest);
+
+  const blob = new Blob([JSON.stringify(out, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "blogs.json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+
+function initBlogAdmin(){
+  const adminBtn = document.getElementById("btn-admin");
+  if(!adminBtn) return;
+
+  const params = new URLSearchParams(location.search);
+  const canSeeAdmin = params.has("admin") || localStorage.getItem(ADMIN_OK_KEY) === "1";
+  adminBtn.hidden = !canSeeAdmin;
+
+  adminBtn.addEventListener("click", async ()=>{
+    const ok = localStorage.getItem(ADMIN_OK_KEY) === "1" ? true : await ensureAdminLogin();
+    if(!ok) return;
+
+    adminBtn.hidden = false;
+    blogSetAdminStatus("");
+    renderAdminList();
+    openAdminModal();
+  });
+
+  document.getElementById("btn-admin-close")?.addEventListener("click", closeAdminModal);
+  document.querySelector("#admin-modal [data-close]")?.addEventListener("click", closeAdminModal);
+
+  document.getElementById("btn-admin-logout")?.addEventListener("click", ()=>{
+    adminLogout();
+    closeAdminModal();
+    // keep button only if ?admin=1 is present
+    const params = new URLSearchParams(location.search);
+    adminBtn.hidden = !params.has("admin");
+  });
+
+  document.getElementById("btn-blog-download")?.addEventListener("click", ()=>{
+    downloadBlogsJson();
+    blogSetAdminStatus("Downloaded blogs.json — commit it to your repo to publish.");
+  });
+
+  document.getElementById("btn-blog-save")?.addEventListener("click", ()=>{
+    const titleEl = document.getElementById("blog-title");
+    const author = document.getElementById("blog-author")?.value || "Birkneh T. Tadesse";
+    const status = document.getElementById("blog-status")?.value || "draft";
+    const content = document.getElementById("blog-content")?.value || "";
+    const title = titleEl?.value || "";
+
+    if(!title.trim()){
+      blogSetAdminStatus("Title is required.");
+      return;
+    }
+    if(!content.trim()){
+      blogSetAdminStatus("Content is required.");
+      return;
+    }
+
+    const editingId = titleEl.getAttribute("data-editing-id") || "";
+    const postedAt = blogNowISO();
+    const slug = blogSlugify(title);
+
+    if(editingId){
+      BLOGS_LOCAL = BLOGS_LOCAL.map(blogNormalize).map(p=>{
+        if(p.id !== editingId) return p;
+        return {
+          ...p,
+          title,
+          slug,
+          author,
+          status,
+          content,
+          postedAt
+        };
+      });
+      titleEl.removeAttribute("data-editing-id");
+      blogSetAdminStatus(status === "published" ? "Updated (published locally). Download blogs.json to publish publicly." : "Updated draft.");
+    }else{
+      BLOGS_LOCAL.unshift({
+        id: `${slug}-${postedAt.slice(0,10)}`,
+        title,
+        slug,
+        author,
+        status,
+        postedAt,
+        content
+      });
+      blogSetAdminStatus(status === "published" ? "Saved (published locally). Download blogs.json to publish publicly." : "Saved draft.");
+    }
+
+    blogSaveLocal();
+    renderAdminList();
+    renderBlogCards();
+
+    // clear editor
+    document.getElementById("blog-title").value = "";
+    document.getElementById("blog-content").value = "";
+  });
+}
+
+/* ---------- Boot blogs ---------- */
+window.addEventListener("DOMContentLoaded", async ()=>{
+  blogLoadLocal();
+  await blogLoadRemote();
+  renderBlogCards();
+  initBlogAdmin();
+});
