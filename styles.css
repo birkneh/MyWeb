@@ -769,3 +769,82 @@ body.dark .admin-row{ background: rgba(255,255,255,0.05); }
   font-weight: 600;
   margin-top: 4px;
 }
+/* =========================================================
+   HERO FIX — Proper editorial white box proportions
+   Paste at VERY END of styles.css
+   ========================================================= */
+
+/* Layout */
+.hero-inner{
+  display: grid !important;
+  grid-template-columns: 420px 1fr !important;
+  align-items: center !important;
+  gap: 0 !important;
+}
+
+/* Photo column */
+.hero-right{
+  grid-column: 1 !important;
+}
+
+.photo{
+  width: 100% !important;
+  height: 520px !important;   /* controlled height */
+  border-radius: 0 !important;
+}
+
+/* White overlay card */
+.hero-left{
+  grid-column: 2 !important;
+
+  background: #ffffff !important;
+  border-radius: 0 !important;
+  box-shadow: 0 24px 80px rgba(0,0,0,.12) !important;
+
+  max-width: 720px !important;   /* CRITICAL — prevents full width stretch */
+  padding: 60px 70px !important;
+
+  margin-left: -120px !important; /* overlap */
+  z-index: 2 !important;
+
+  align-self: center !important;
+}
+
+/* Typography */
+.hero-title{
+  font-family: "EB Garamond", Georgia, serif !important;
+  font-size: clamp(52px, 5vw, 84px) !important;
+  font-weight: 400 !important;
+  line-height: 1.05 !important;
+  margin-bottom: 20px !important;
+}
+
+.hero-lede{
+  font-size: 22px !important;
+  line-height: 1.6 !important;
+  max-width: 44ch !important;
+  color: rgba(0,0,0,.65) !important;
+}
+
+/* Make chips more minimal */
+.chip{
+  background: rgba(0,0,0,.03) !important;
+  border-radius: 999px !important;
+}
+
+/* Responsive */
+@media (max-width: 1000px){
+  .hero-inner{
+    grid-template-columns: 1fr !important;
+  }
+
+  .photo{
+    height: 380px !important;
+  }
+
+  .hero-left{
+    margin-left: 0 !important;
+    margin-top: -40px !important;
+    padding: 40px 30px !important;
+  }
+}
