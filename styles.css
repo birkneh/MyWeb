@@ -973,3 +973,75 @@ body.dark .btn-primary:hover{ background: rgba(255,255,255,0.80); }
   line-height: 1;
   white-space: nowrap;
 }
+/* =========================================
+   FIX: BT overlaps name + clean header spacing
+   Paste at END of styles.css
+   ========================================= */
+
+/* Use a simple, robust header layout */
+.topbar-inner{
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+}
+
+/* Brand: reserve space for the square mark */
+.brand{
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  min-width: 0 !important;
+}
+
+/* Make the mark a real box and NEVER overlay text */
+.brand-mark{
+  display: inline-grid !important;
+  place-items: center !important;
+  width: 56px !important;
+  height: 56px !important;
+  flex: 0 0 56px !important;
+  border-radius: 2px !important;
+  border: 2px solid rgba(17,17,17,.65) !important;
+  background: transparent !important;
+
+  /* kill any old positioning rules that could float it over the name */
+  position: relative !important;
+  box-shadow: none !important;
+}
+
+/* Make the “BT” sit INSIDE the box using normal flow (no absolute overlay) */
+.brand-mark::after{
+  content: "BT" !important;
+  font-family: "EB Garamond", Georgia, serif !important;
+  font-size: 22px !important;
+  letter-spacing: .06em !important;
+  color: rgba(17,17,17,.85) !important;
+
+  /* override any previous absolute/inset rules */
+  position: static !important;
+  inset: auto !important;
+  display: block !important;
+}
+
+/* Brand text spacing */
+.brand-text{
+  display: block !important;
+  line-height: 1.05 !important;
+  white-space: nowrap !important;
+}
+
+/* Keep nav centered and prevent it from pushing into brand */
+.nav{
+  flex: 1 1 auto !important;
+  justify-content: center !important;
+  min-width: 0 !important;
+}
+
+/* Dark theme matching */
+body.dark .brand-mark{
+  border-color: rgba(255,255,255,.65) !important;
+}
+body.dark .brand-mark::after{
+  color: rgba(255,255,255,.90) !important;
+}
